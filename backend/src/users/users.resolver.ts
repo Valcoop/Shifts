@@ -9,8 +9,11 @@ export class UsersResolver {
   constructor(private userService: UsersService) {}
 
   @Query()
-  user(@Args('userID') userID: string): Promise<User> {
-    return this.userService.findOne(userID);
+  async user(@Args('userID') userID: string): Promise<User> {
+    const user = await this.userService.findOne(userID);
+    if (!user) throw new Error();
+
+    return user;
   }
 
   @ResolveField()
