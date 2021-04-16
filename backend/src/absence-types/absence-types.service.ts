@@ -10,13 +10,13 @@ export class AbsenceTypesService {
     private absenceTypeRepository: Repository<AbsenceType>,
   ) {}
 
-  find(pagination: { first?: number; after?: string }) {
+  find(pagination?: { first?: number; after?: string }) {
     return Promise.all([
       this.absenceTypeRepository.find({
-        where: { id: LessThan(pagination.after) },
-        take: pagination.first || 10,
+        ...(pagination?.after && { where: { id: LessThan(pagination.after) } }),
+        take: pagination?.first || 10,
       }),
-      this.absenceTypeRepository.count({}),
+      this.absenceTypeRepository.count(),
     ]);
   }
 

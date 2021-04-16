@@ -10,7 +10,7 @@ export class AbsenceTypesResolver {
 
   @Query()
   async absenceTypes(
-    @Args('input') input: AbsenceTypesInput,
+    @Args('input') input?: AbsenceTypesInput,
   ): Promise<AbsenceTypeConnection> {
     const [absenceTypes, totalCount] = await this.absenceTypesService.find(
       input,
