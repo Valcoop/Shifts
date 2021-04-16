@@ -1,0 +1,47 @@
+type Query {
+  jobs(input: JobsInput): JobConnection!
+}
+
+input JobsInput {
+  first: Int
+  after: ID
+}
+
+type Mutation {
+  addJob(input: AddJobInput!): AddJobPayload!
+  removeJob(input: RemoveJobInput!): RemoveJobPayload!
+}
+
+input AddJobInput {
+  name: String!
+  color: String!
+}
+
+type AddJobPayload {
+  job: Job!
+}
+
+input RemoveJobInput {
+  jobID: ID!
+}
+
+type RemoveJobPayload {
+  job: Job!
+}
+
+type JobConnection {
+  edges: [JobEdge!]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type JobEdge {
+  cursor: ID!
+  node: Job!
+}
+
+type Job {
+  id: ID!
+  name: String!
+  color: String!
+}

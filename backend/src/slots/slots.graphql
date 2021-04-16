@@ -1,0 +1,98 @@
+type Query {
+  slots(input: SlotsInput): [Slot!]!
+}
+
+input SlotsInput {
+  startDate: Date!
+  duration: Int!
+  active: Boolean
+}
+
+type Mutation {
+  bookSlot(input: BookSlotInput!): BookSlotPayload!
+  cancelBookedSlot(input: CancelBookedSlotInput!): CancelBookedSlotPayload!
+  addSlot(input: AddSlotInput!): AddSlotPayload!
+  removeSlot(input: RemoveSlotInput!): RemoveSlotPayload!
+  updateSlot(input: UpdateSlotInput!): UpdateSlotPayload!
+}
+
+input BookSlotInput {
+  userID: String!
+  slotID: ID!
+  fullName: String!
+  phoneNumber: String!
+}
+
+type BookSlotPayload {
+  slot: Slot!
+}
+
+input CancelBookedSlotInput {
+  userID: String!
+  slotID: ID!
+  absenceTypeID: String!
+  description: String
+}
+
+type CancelBookedSlotPayload {
+  slot: Slot!
+}
+
+input AddSlotInput {
+  startDate: Date!
+  duration: Int!
+  jobID: String!
+  totalPlace: Int!
+  active: Boolean!
+}
+
+type AddSlotPayload {
+  slot: Slot!
+}
+
+input RemoveSlotInput {
+  slotID: ID!
+}
+
+type RemoveSlotPayload {
+  slot: Slot!
+}
+
+input UpdateSlotInput {
+  slotID: ID!
+  startDate: Date
+  duration: Int
+  jobID: String
+  totalPlace: Int
+  active: Boolean
+}
+
+type UpdateSlotPayload {
+  slot: Slot!
+}
+
+type SlotConnection {
+  edges: [SlotEdge!]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type SlotEdge {
+  cursor: ID!
+  node: Slot!
+}
+
+type Slot {
+  id: ID!
+  startDate: Date!
+  duration: Int!
+  jobID: String!
+  attendees(input: SlotAttendeesInput!): UserConnection!
+  totalPlace: Int!
+  active: Boolean!
+}
+
+input SlotAttendeesInput {
+  first: Int
+  after: ID
+}

@@ -1,0 +1,27 @@
+type Query {
+  user(userID: ID!): User!
+}
+
+type UserConnection {
+  edges: [UserEdge!]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type UserEdge {
+  cursor: ID!
+  node: User!
+}
+
+type User {
+  id: ID!
+  firstname: String!
+  lastname: String!
+  phoneNumber: String!
+  slots(input: UserSlotsInput!): SlotConnection!
+}
+
+input UserSlotsInput {
+  first: Int
+  after: ID
+}

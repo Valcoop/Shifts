@@ -1,0 +1,36 @@
+type Query {
+  absenceTypes(input: AbsenceTypesInput): AbsenceTypeConnection!
+}
+
+type Mutation {
+  addAbsenceType(input: AddAbsenceTypeInput!): AddAbsenceTypePayload!
+}
+
+input AddAbsenceTypeInput {
+  reason: String!
+}
+
+type AddAbsenceTypePayload {
+  absenceType: AbsenceType!
+}
+
+input AbsenceTypesInput {
+  first: Int
+  after: ID
+}
+
+type AbsenceTypeConnection {
+  edges: [AbsenceTypeEdge!]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type AbsenceTypeEdge {
+  cursor: ID!
+  node: AbsenceType!
+}
+
+type AbsenceType {
+  id: ID!
+  reason: String!
+}
