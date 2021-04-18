@@ -1,0 +1,6 @@
+{
+  "@quasar/qcalendar": {},
+  "@quasar/apollo": {
+    "graphql_uri": "http://[::1]:3000/graphql"
+  }
+}

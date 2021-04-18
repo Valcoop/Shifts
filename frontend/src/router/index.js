@@ -1,9 +1,21 @@
 import Vue from 'vue'
+import VueApollo from 'vue-apollo'
 import VueRouter from 'vue-router'
+import VueMq from 'vue-mq'
 
 import routes from './routes'
 
 Vue.use(VueRouter)
+
+Vue.use(VueMq, {
+  breakpoints: {
+    sm: 450,
+    md: 1250,
+    lg: Infinity
+  }
+})
+
+Vue.use(VueApollo)
 
 /*
  * If not building with SSR mode, you can
