@@ -25,7 +25,7 @@ export class AbsenceTypesResolver {
       pageInfo: {
         // @TODO: fix me
         hasNextPage: false,
-        endCursor: absenceTypes[absenceTypes.length - 1].id.toString(),
+        endCursor: absenceTypes[absenceTypes.length - 1]?.id.toString(),
       },
     };
   }

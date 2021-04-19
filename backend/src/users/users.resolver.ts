@@ -35,7 +35,7 @@ export class UsersResolver {
       pageInfo: {
         // @TODO: fix me
         hasNextPage: false,
-        endCursor: slots[slots.length - 1].id.toString(),
+        endCursor: slots[slots.length - 1]?.id.toString(),
       },
     };
   }

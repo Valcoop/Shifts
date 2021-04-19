@@ -103,7 +103,7 @@ export class SlotsResolver {
       pageInfo: {
         // @TODO: fix me
         hasNextPage: false,
-        endCursor: attendees[attendees.length - 1].id.toString(),
+        endCursor: attendees[attendees.length - 1]?.id.toString(),
       },
     };
   }

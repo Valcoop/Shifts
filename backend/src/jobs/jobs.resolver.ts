@@ -21,7 +21,7 @@ export class JobsResolver {
       pageInfo: {
         // @TODO: fix me
         hasNextPage: false,
-        endCursor: jobs[jobs.length - 1].id.toString(),
+        endCursor: jobs[jobs.length - 1]?.id.toString(),
       },
     };
   }
