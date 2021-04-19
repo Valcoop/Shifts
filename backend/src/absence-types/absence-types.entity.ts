@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('absence-types')
+@Entity('absence_types')
 export class AbsenceType {
   @PrimaryGeneratedColumn()
   id: number;
