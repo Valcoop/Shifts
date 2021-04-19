@@ -32,7 +32,7 @@ export interface RemoveJobInput {
 
 export interface SlotsInput {
     startDate: Date;
-    duration: number;
+    endDate: Date;
     active?: boolean;
 }
 

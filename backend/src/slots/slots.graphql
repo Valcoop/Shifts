@@ -4,7 +4,7 @@ type Query {
 
 input SlotsInput {
   startDate: Date!
-  duration: Int!
+  endDate: Date!
   active: Boolean
 }
 

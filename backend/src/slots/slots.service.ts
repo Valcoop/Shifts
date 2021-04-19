@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, MoreThan, Repository } from 'typeorm';
+import { In, LessThan, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
 import { User } from '../users/users.entity';
 import { Slot } from './slots.entity';
@@ -28,12 +28,11 @@ export class SlotsService {
     private userSlotAbsenceRepository: Repository<UserSlotAbsence>,
   ) {}
 
-  find({ active, duration, startDate }: SlotsInput) {
+  find({ active, endDate, startDate }: SlotsInput) {
     return this.slotRepository.find({
       where: {
         ...(active && { active }),
-        startDate: MoreThan(startDate),
-        duration,
+        startDate: [MoreThan(startDate), LessThanOrEqual(endDate)],
       },
     });
   }
