@@ -4,6 +4,7 @@ type Query {
 
 type Mutation {
   addAbsenceType(input: AddAbsenceTypeInput!): AddAbsenceTypePayload!
+  updateAbsenceType(input: UpdateAbsenceTypeInput!): UpdateAbsenceTypePayload!
 }
 
 input AddAbsenceTypeInput {
@@ -11,6 +12,15 @@ input AddAbsenceTypeInput {
 }
 
 type AddAbsenceTypePayload {
+  absenceType: AbsenceType!
+}
+
+input UpdateAbsenceTypeInput {
+  absenceTypeID: ID!
+  reason: String
+}
+
+type UpdateAbsenceTypePayload {
   absenceType: AbsenceType!
 }
 

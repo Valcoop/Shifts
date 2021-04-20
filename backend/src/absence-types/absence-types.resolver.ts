@@ -1,5 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AbsenceTypesInput, AddAbsenceTypeInput } from '../graphql';
+import {
+  AbsenceTypesInput,
+  AddAbsenceTypeInput,
+  UpdateAbsenceTypeInput,
+} from '../graphql';
 import { AbsenceTypeConnection } from '../graphql-types';
 import { AbsenceType } from './absence-types.entity';
 import { AbsenceTypesService } from './absence-types.service';
@@ -35,5 +39,17 @@ export class AbsenceTypesResolver {
     @Args('input') input: AddAbsenceTypeInput,
   ): Promise<{ absenceType: AbsenceType }> {
     return { absenceType: await this.absenceTypesService.save(input.reason) };
+  }
+
+  @Mutation()
+  async updateAbsenceType(
+    @Args('input') { absenceTypeID, reason }: UpdateAbsenceTypeInput,
+  ): Promise<{ absenceType: AbsenceType }> {
+    return {
+      absenceType: await this.absenceTypesService.update(
+        Number(absenceTypeID),
+        { ...(reason != null ? { reason } : {}) },
+      ),
+    };
   }
 }

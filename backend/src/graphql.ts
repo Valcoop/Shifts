@@ -11,6 +11,11 @@ export interface AddAbsenceTypeInput {
     reason: string;
 }
 
+export interface UpdateAbsenceTypeInput {
+    absenceTypeID: string;
+    reason?: string;
+}
+
 export interface AbsenceTypesInput {
     first?: number;
     after?: string;
@@ -97,6 +102,7 @@ export interface IQuery {
 
 export interface IMutation {
     addAbsenceType(input: AddAbsenceTypeInput): AddAbsenceTypePayload | Promise<AddAbsenceTypePayload>;
+    updateAbsenceType(input: UpdateAbsenceTypeInput): UpdateAbsenceTypePayload | Promise<UpdateAbsenceTypePayload>;
     addJob(input: AddJobInput): AddJobPayload | Promise<AddJobPayload>;
     removeJob(input: RemoveJobInput): RemoveJobPayload | Promise<RemoveJobPayload>;
     updateJob(input: UpdateJobInput): UpdateJobPayload | Promise<UpdateJobPayload>;
@@ -108,6 +114,10 @@ export interface IMutation {
 }
 
 export interface AddAbsenceTypePayload {
+    absenceType: AbsenceType;
+}
+
+export interface UpdateAbsenceTypePayload {
     absenceType: AbsenceType;
 }
 

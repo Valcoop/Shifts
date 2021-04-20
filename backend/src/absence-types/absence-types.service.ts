@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
 import { AbsenceType } from './absence-types.entity';
 
+interface AbsenceTypeDAO {
+  reason: string;
+}
+
 @Injectable()
 export class AbsenceTypesService {
   constructor(
@@ -21,7 +25,17 @@ export class AbsenceTypesService {
   }
 
   save(reason: string) {
-    const absenceTypeEntity = this.absenceTypeRepository.create({ reason });
-    return this.absenceTypeRepository.save(absenceTypeEntity);
+    return this.absenceTypeRepository.save(
+      this.absenceTypeRepository.create({ reason }),
+    );
+  }
+
+  update(absenceTypeID: number, absenceTypeDAO: Partial<AbsenceTypeDAO>) {
+    return this.absenceTypeRepository.save(
+      this.absenceTypeRepository.create({
+        id: absenceTypeID,
+        ...absenceTypeDAO,
+      }),
+    );
   }
 }
