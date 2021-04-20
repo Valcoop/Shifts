@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import { Between, In, LessThan, Repository } from 'typeorm';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
 import { User } from '../users/users.entity';
 import { Slot } from './slots.entity';
@@ -32,7 +32,7 @@ export class SlotsService {
     const slots = await this.slotRepository.find({
       where: {
         ...(active != null ? { active } : {}),
-        startDate: [MoreThan(startDate), LessThanOrEqual(endDate)],
+        startDate: Between(startDate, endDate),
       },
     });
 
