@@ -87,7 +87,7 @@ type Slot {
   id: ID!
   startDate: Date!
   duration: Int!
-  jobID: String!
+  job: Job!
   attendees(input: SlotAttendeesInput!): UserConnection!
   totalPlace: Int!
   active: Boolean!

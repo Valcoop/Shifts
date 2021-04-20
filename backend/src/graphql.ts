@@ -185,7 +185,7 @@ export interface Slot {
     id: string;
     startDate: Date;
     duration: number;
-    jobID: string;
+    job: Job;
     attendees: UserConnection;
     totalPlace: number;
     active: boolean;

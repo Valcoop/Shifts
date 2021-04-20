@@ -18,6 +18,10 @@ export class JobsService {
     ]);
   }
 
+  findByID(id: number) {
+    return this.jobRepository.findOne({ where: { id } });
+  }
+
   save({ color, name }: AddJobInput) {
     const jobEntity = this.jobRepository.create({ name, color });
     return this.jobRepository.save(jobEntity);

@@ -16,12 +16,16 @@ import {
   UpdateSlotInput,
 } from '../graphql';
 import { UserConnection } from '../graphql-types';
+import { JobsService } from '../jobs/jobs.service';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
 
 @Resolver('Slot')
 export class SlotsResolver {
-  constructor(private slotsService: SlotsService) {}
+  constructor(
+    private slotsService: SlotsService,
+    private jobService: JobsService,
+  ) {}
 
   @Query()
   async slots(@Args('input') input: SlotsInput): Promise<Slot[]> {
@@ -106,5 +110,10 @@ export class SlotsResolver {
         endCursor: attendees[attendees.length - 1]?.id.toString(),
       },
     };
+  }
+
+  @ResolveField()
+  job(@Parent() slot: Slot) {
+    return this.jobService.findByID(slot.jobID);
   }
 }
