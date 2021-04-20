@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
-import { AddJobInput } from '../graphql';
 import { Job } from './jobs.entity';
+
+interface JobDAO {
+  name: string;
+  color: string;
+}
 
 @Injectable()
 export class JobsService {
@@ -22,9 +26,8 @@ export class JobsService {
     return this.jobRepository.findOne({ where: { id } });
   }
 
-  save({ color, name }: AddJobInput) {
-    const jobEntity = this.jobRepository.create({ name, color });
-    return this.jobRepository.save(jobEntity);
+  save(jobDAO: JobDAO) {
+    return this.jobRepository.save(this.jobRepository.create(jobDAO));
   }
 
   async delete(jobID: string) {
@@ -35,5 +38,11 @@ export class JobsService {
     this.jobRepository.remove(job);
 
     return job;
+  }
+
+  update(jobID: number, jobDAO: Partial<JobDAO>) {
+    return this.jobRepository.save(
+      this.jobRepository.create({ id: jobID, ...jobDAO }),
+    );
   }
 }

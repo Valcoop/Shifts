@@ -30,6 +30,12 @@ export interface RemoveJobInput {
     jobID: string;
 }
 
+export interface UpdateJobInput {
+    jobID: string;
+    name?: string;
+    color?: string;
+}
+
 export interface SlotsInput {
     startDate: Date;
     endDate: Date;
@@ -93,6 +99,7 @@ export interface IMutation {
     addAbsenceType(input: AddAbsenceTypeInput): AddAbsenceTypePayload | Promise<AddAbsenceTypePayload>;
     addJob(input: AddJobInput): AddJobPayload | Promise<AddJobPayload>;
     removeJob(input: RemoveJobInput): RemoveJobPayload | Promise<RemoveJobPayload>;
+    updateJob(input: UpdateJobInput): UpdateJobPayload | Promise<UpdateJobPayload>;
     bookSlot(input: BookSlotInput): BookSlotPayload | Promise<BookSlotPayload>;
     cancelBookedSlot(input: CancelBookedSlotInput): CancelBookedSlotPayload | Promise<CancelBookedSlotPayload>;
     addSlot(input: AddSlotInput): AddSlotPayload | Promise<AddSlotPayload>;
@@ -125,6 +132,10 @@ export interface AddJobPayload {
 }
 
 export interface RemoveJobPayload {
+    job: Job;
+}
+
+export interface UpdateJobPayload {
     job: Job;
 }
 

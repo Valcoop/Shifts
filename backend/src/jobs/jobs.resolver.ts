@@ -1,5 +1,10 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AddJobInput, JobsInput, RemoveJobInput } from '../graphql';
+import {
+  AddJobInput,
+  JobsInput,
+  RemoveJobInput,
+  UpdateJobInput,
+} from '../graphql';
 import { JobConnection } from '../graphql-types';
 import { Job } from './jobs.entity';
 import { JobsService } from './jobs.service';
@@ -34,5 +39,17 @@ export class JobsResolver {
   @Mutation()
   async removeJob(@Args('input') input: RemoveJobInput): Promise<{ job: Job }> {
     return { job: await this.jobService.delete(input.jobID) };
+  }
+
+  @Mutation()
+  async updateJob(
+    @Args('input') { jobID, color, name }: UpdateJobInput,
+  ): Promise<{ job: Job }> {
+    return {
+      job: await this.jobService.update(Number(jobID), {
+        ...(color != null ? { color } : {}),
+        ...(name != null ? { name } : {}),
+      }),
+    };
   }
 }
