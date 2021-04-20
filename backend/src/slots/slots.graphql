@@ -6,6 +6,7 @@ input SlotsInput {
   startDate: Date!
   endDate: Date!
   active: Boolean
+  isFull: Boolean
 }
 
 type Mutation {

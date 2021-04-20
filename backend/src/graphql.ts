@@ -34,6 +34,7 @@ export interface SlotsInput {
     startDate: Date;
     endDate: Date;
     active?: boolean;
+    isFull?: boolean;
 }
 
 export interface BookSlotInput {

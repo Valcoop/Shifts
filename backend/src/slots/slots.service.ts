@@ -28,13 +28,25 @@ export class SlotsService {
     private userSlotAbsenceRepository: Repository<UserSlotAbsence>,
   ) {}
 
-  find({ active, endDate, startDate }: SlotsInput) {
-    return this.slotRepository.find({
+  async find({ active, endDate, startDate, isFull }: SlotsInput) {
+    const slots = await this.slotRepository.find({
       where: {
-        ...(active && { active }),
+        ...(active != null ? { active } : {}),
         startDate: [MoreThan(startDate), LessThanOrEqual(endDate)],
       },
     });
+
+    if (isFull == undefined) return slots;
+
+    const userSlotsCount = await Promise.all(
+      slots.map((slot) =>
+        this.userSlotRepository.count({ isDeleted: false, slotID: slot.id }),
+      ),
+    );
+
+    return isFull
+      ? slots.filter((slot, i) => userSlotsCount[i] >= slot.totalPlace)
+      : slots.filter((slot, i) => userSlotsCount[i] < slot.totalPlace);
   }
 
   async book({ userID, slotID, fullName, phoneNumber }: BookSlotInput) {
