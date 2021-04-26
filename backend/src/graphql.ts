@@ -207,9 +207,27 @@ export interface Slot {
     startDate: Date;
     duration: number;
     job: Job;
-    attendees: UserConnection;
+    attendees: AttendeeConnection;
     totalPlace: number;
     active: boolean;
+}
+
+export interface AttendeeConnection {
+    edges?: AttendeeEdge[];
+    pageInfo?: PageInfo;
+    totalCount: number;
+}
+
+export interface AttendeeEdge {
+    cursor: string;
+    node: Attendee;
+}
+
+export interface Attendee {
+    id: string;
+    userID: string;
+    fullName: string;
+    phoneNumber: string;
 }
 
 export interface UserConnection {

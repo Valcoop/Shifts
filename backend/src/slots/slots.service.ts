@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, In, LessThan, Repository } from 'typeorm';
+import { Between, LessThan, Repository } from 'typeorm';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
-import { User } from '../users/users.entity';
 import { Slot } from './slots.entity';
 import { UserSlotAbsence } from './users-slots-absences.entity';
 import { UserSlot } from './users-slots.entity';
@@ -21,7 +20,6 @@ interface SlotDAO {
 export class SlotsService {
   constructor(
     @InjectRepository(Slot) private slotRepository: Repository<Slot>,
-    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserSlot)
     private userSlotRepository: Repository<UserSlot>,
     @InjectRepository(UserSlotAbsence)
@@ -121,8 +119,8 @@ export class SlotsService {
   async getAttendeesAndCount(
     slotID: number,
     pagination: { first?: number; after?: string },
-  ): Promise<[User[], number]> {
-    const [usersSlots, totalCount] = await Promise.all([
+  ): Promise<[UserSlot[], number]> {
+    return Promise.all([
       this.userSlotRepository.find({
         where: {
           ...(pagination.after && { id: LessThan(pagination.after) }),
@@ -132,19 +130,5 @@ export class SlotsService {
       }),
       this.userSlotRepository.count({ where: { slotID } }),
     ]);
-
-    return [
-      await Promise.all(
-        usersSlots.map(async (userSlot) => {
-          const user = await this.userRepository.findOne({
-            where: { id: userSlot.userID },
-          });
-          // TODO: FIX ME
-          if (!user) throw Error();
-          return user;
-        }),
-      ),
-      totalCount,
-    ];
   }
 }

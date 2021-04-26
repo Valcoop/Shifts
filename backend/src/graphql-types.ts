@@ -4,9 +4,11 @@ import {
   JobConnection as GraphQLJobConnection,
   SlotConnection as GraphQLSlotConnection,
   UserConnection as GraphQLUserConnection,
+  AttendeeConnection as GraphQLAttendeeConnection,
 } from './graphql';
 import { Job } from './jobs/jobs.entity';
 import { Slot } from './slots/slots.entity';
+import { UserSlot } from './slots/users-slots.entity';
 import { User } from './users/users.entity';
 
 export interface UserEdge {
@@ -44,4 +46,14 @@ export interface SlotEdge {
 
 export interface SlotConnection extends Omit<GraphQLSlotConnection, 'edges'> {
   edges?: SlotEdge[];
+}
+
+export interface AttendeeEdge {
+  cursor: string;
+  node: UserSlot;
+}
+
+export interface AttendeeConnection
+  extends Omit<GraphQLAttendeeConnection, 'edges'> {
+  edges?: AttendeeEdge[];
 }

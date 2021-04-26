@@ -15,7 +15,7 @@ import {
   SlotsInput,
   UpdateSlotInput,
 } from '../graphql';
-import { UserConnection } from '../graphql-types';
+import { AttendeeConnection } from '../graphql-types';
 import { JobsService } from '../jobs/jobs.service';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
@@ -92,7 +92,7 @@ export class SlotsResolver {
   async attendees(
     @Parent() slot: Slot,
     @Args('input') input: SlotAttendeesInput,
-  ): Promise<UserConnection> {
+  ): Promise<AttendeeConnection> {
     const [
       attendees,
       totalCount,
