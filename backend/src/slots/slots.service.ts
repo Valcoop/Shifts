@@ -134,9 +134,16 @@ export class SlotsService {
     ]);
 
     return [
-      await this.userRepository.find({
-        where: { id: In(usersSlots.map((userSlot) => userSlot.id)) },
-      }),
+      await Promise.all(
+        usersSlots.map(async (userSlot) => {
+          const user = await this.userRepository.findOne({
+            where: { id: userSlot.userID },
+          });
+          // TODO: FIX ME
+          if (!user) throw Error();
+          return user;
+        }),
+      ),
       totalCount,
     ];
   }
