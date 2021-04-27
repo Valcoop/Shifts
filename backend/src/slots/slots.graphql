@@ -15,6 +15,7 @@ type Mutation {
   addSlot(input: AddSlotInput!): AddSlotPayload!
   removeSlot(input: RemoveSlotInput!): RemoveSlotPayload!
   updateSlot(input: UpdateSlotInput!): UpdateSlotPayload!
+  updateUserSlot(input: UpdateUserSlotInput!): UpdateUserSlotPayload!
 }
 
 input BookSlotInput {
@@ -69,6 +70,16 @@ input UpdateSlotInput {
 
 type UpdateSlotPayload {
   slot: Slot!
+}
+
+input UpdateUserSlotInput {
+  userSlotID: ID!
+  fullname: String
+  phoneNumber: String
+}
+
+type UpdateUserSlotPayload {
+  attendee: Attendee!
 }
 
 type SlotConnection {

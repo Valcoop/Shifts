@@ -82,6 +82,12 @@ export interface UpdateSlotInput {
     active?: boolean;
 }
 
+export interface UpdateUserSlotInput {
+    userSlotID: string;
+    fullname?: string;
+    phoneNumber?: string;
+}
+
 export interface SlotAttendeesInput {
     first?: number;
     after?: string;
@@ -110,6 +116,7 @@ export interface IMutation {
     addSlot(input: AddSlotInput): AddSlotPayload | Promise<AddSlotPayload>;
     removeSlot(input: RemoveSlotInput): RemoveSlotPayload | Promise<RemoveSlotPayload>;
     updateSlot(input: UpdateSlotInput): UpdateSlotPayload | Promise<UpdateSlotPayload>;
+    updateUserSlot(input: UpdateUserSlotInput): UpdateUserSlotPayload | Promise<UpdateUserSlotPayload>;
 }
 
 export interface AddAbsenceTypePayload {
@@ -188,6 +195,10 @@ export interface RemoveSlotPayload {
 
 export interface UpdateSlotPayload {
     slot: Slot;
+}
+
+export interface UpdateUserSlotPayload {
+    attendee: Attendee;
 }
 
 export interface SlotConnection {

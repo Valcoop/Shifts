@@ -16,6 +16,11 @@ interface SlotDAO {
   totalPlace: number;
 }
 
+interface UserSlotDAO {
+  fullName: string;
+  phoneNumber: string;
+}
+
 @Injectable()
 export class SlotsService {
   constructor(
@@ -127,5 +132,15 @@ export class SlotsService {
       }),
       this.userSlotRepository.count({ where: { slotID } }),
     ]);
+  }
+
+  // UserSlot
+  updateUserSlot(id: number, userSlotDAO: Partial<UserSlotDAO>) {
+    return this.userSlotRepository.save(
+      this.userSlotRepository.create({
+        id,
+        ...userSlotDAO,
+      }),
+    );
   }
 }
