@@ -19,6 +19,7 @@ import { AttendeeConnection } from '../graphql-types';
 import { JobsService } from '../jobs/jobs.service';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
+import { UserSlot } from './users-slots.entity';
 
 @Resolver('Slot')
 export class SlotsResolver {
@@ -115,5 +116,10 @@ export class SlotsResolver {
   @ResolveField()
   job(@Parent() slot: Slot) {
     return this.jobService.findByID(slot.jobID);
+  }
+
+  @ResolveField('Attendee')
+  userSlotID(@Parent() userSlot: UserSlot) {
+    return userSlot.id;
   }
 }

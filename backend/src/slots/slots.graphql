@@ -29,8 +29,7 @@ type BookSlotPayload {
 }
 
 input CancelBookedSlotInput {
-  userID: String!
-  slotID: ID!
+  userSlotID: ID!
   absenceTypeID: String!
   description: String
 }
@@ -105,7 +104,7 @@ type AttendeeEdge {
 }
 
 type Attendee {
-  id: ID!
+  userSlotsID: ID!
   userID: String!
   fullName: String!
   phoneNumber: String!

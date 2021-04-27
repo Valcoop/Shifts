@@ -56,8 +56,7 @@ export interface BookSlotInput {
 }
 
 export interface CancelBookedSlotInput {
-    userID: string;
-    slotID: string;
+    userSlotID: string;
     absenceTypeID: string;
     description?: string;
 }
@@ -224,7 +223,7 @@ export interface AttendeeEdge {
 }
 
 export interface Attendee {
-    id: string;
+    userSlotsID: string;
     userID: string;
     fullName: string;
     phoneNumber: string;

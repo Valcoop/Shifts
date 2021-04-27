@@ -66,26 +66,20 @@ export class SlotsService {
   }
 
   async cancelBooked({
-    slotID,
-    userID,
+    userSlotID,
     absenceTypeID,
     description,
   }: CancelBookedSlotInput) {
-    const slot = await this.slotRepository.findOne(slotID);
+    const userSlot = await this.userSlotRepository.findOne(userSlotID);
     // TODO: FIX ME
-    if (!slot) throw new Error();
+    if (!userSlot) throw new Error();
 
-    const userSlot = await this.userSlotRepository.findOne({
-      where: { slotID, userID },
-    });
-
-    const userSlotAbsenceEntity = this.userSlotAbsenceRepository.create({
-      userID: Number(userID),
-      absenceTypeID: Number(absenceTypeID),
-      description,
-    });
     const userSlotAbsence = await this.userSlotAbsenceRepository.save(
-      userSlotAbsenceEntity,
+      this.userSlotAbsenceRepository.create({
+        userID: userSlot.userID,
+        absenceTypeID: Number(absenceTypeID),
+        description,
+      }),
     );
 
     // TODO: check if the update is correct
@@ -94,6 +88,9 @@ export class SlotsService {
       userSlotAbsenceID: userSlotAbsence.id,
     });
 
+    const slot = await this.slotRepository.findOne(userSlot.slotID);
+    // TODO: FIX ME
+    if (!slot) throw new Error();
     return slot;
   }
 
