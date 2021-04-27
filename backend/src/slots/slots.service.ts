@@ -87,10 +87,10 @@ export class SlotsService {
       }),
     );
 
-    // TODO: check if the update is correct
     await this.userSlotRepository.save({
-      ...userSlot,
+      id: userSlot.id,
       userSlotAbsenceID: userSlotAbsence.id,
+      isDeleted: true,
     });
 
     const slot = await this.slotRepository.findOne(userSlot.slotID);
