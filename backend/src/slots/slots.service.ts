@@ -125,12 +125,13 @@ export class SlotsService {
     return Promise.all([
       this.userSlotRepository.find({
         where: {
-          ...(pagination.after && { id: LessThan(pagination.after) }),
           slotID,
+          isDeleted: false,
+          ...(pagination.after && { id: LessThan(pagination.after) }),
         },
         take: pagination.first || 10,
       }),
-      this.userSlotRepository.count({ where: { slotID } }),
+      this.userSlotRepository.count({ where: { slotID, isDeleted: false } }),
     ]);
   }
 
