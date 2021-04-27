@@ -115,7 +115,7 @@ type AttendeeEdge {
 }
 
 type Attendee {
-  userSlotsID: ID!
+  userSlotID: ID!
   userID: String!
   fullName: String!
   phoneNumber: String!

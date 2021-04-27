@@ -234,7 +234,7 @@ export interface AttendeeEdge {
 }
 
 export interface Attendee {
-    userSlotsID: string;
+    userSlotID: string;
     userID: string;
     fullName: string;
     phoneNumber: string;
