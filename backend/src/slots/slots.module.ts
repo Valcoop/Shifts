@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobsModule } from '../jobs/jobs.module';
 import { UsersModule } from '../users/users.module';
 import { Slot } from './slots.entity';
-import { SlotsResolver } from './slots.resolver';
+import { AttendeeResolver, SlotsResolver } from './slots.resolver';
 import { SlotsService } from './slots.service';
 import { UserSlotAbsence } from './users-slots-absences.entity';
 import { UserSlot } from './users-slots.entity';
@@ -14,6 +14,6 @@ import { UserSlot } from './users-slots.entity';
     JobsModule,
     UsersModule,
   ],
-  providers: [SlotsResolver, SlotsService],
+  providers: [SlotsResolver, AttendeeResolver, SlotsService],
 })
 export class SlotsModule {}

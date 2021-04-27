@@ -130,8 +130,10 @@ export class SlotsResolver {
   job(@Parent() slot: Slot) {
     return this.jobService.findByID(slot.jobID);
   }
+}
 
-  @ResolveField('Attendee')
+@Resolver('Attendee')
+export class AttendeeResolver {
   userSlotID(@Parent() userSlot: UserSlot) {
     return userSlot.id;
   }
