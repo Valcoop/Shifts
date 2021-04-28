@@ -37,6 +37,7 @@ export class SlotsService {
         ...(active != null ? { active } : {}),
         startDate: Between(startDate, endDate),
       },
+      order: { startDate: 1 },
     });
 
     if (isFull == undefined) return slots;
