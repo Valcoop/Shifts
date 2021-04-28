@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, LessThan, Repository } from 'typeorm';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
-import { UserSlotAbsence } from '../users-slots/users-slots-absences.entity';
-import { UserSlot } from '../users-slots/users-slots.entity';
+import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
+import { UserSlot } from '../user-slots/user-slots.entity';
 import { Slot } from './slots.entity';
 
 interface SlotDAO {

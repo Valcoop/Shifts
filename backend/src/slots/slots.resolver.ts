@@ -18,7 +18,7 @@ import {
 } from '../graphql';
 import { AttendeeConnection } from '../graphql-types';
 import { JobsService } from '../jobs/jobs.service';
-import { UserSlot } from '../users-slots/users-slots.entity';
+import { UserSlot } from '../user-slots/user-slots.entity';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
 

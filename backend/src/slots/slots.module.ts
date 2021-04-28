@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobsModule } from '../jobs/jobs.module';
-import { UserSlotAbsence } from '../users-slots/users-slots-absences.entity';
-import { UserSlot } from '../users-slots/users-slots.entity';
+import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
+import { UserSlot } from '../user-slots/user-slots.entity';
 import { UsersModule } from '../users/users.module';
 import { Slot } from './slots.entity';
 import { AttendeeResolver, SlotsResolver } from './slots.resolver';

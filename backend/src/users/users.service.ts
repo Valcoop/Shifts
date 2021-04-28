@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, LessThan, Repository } from 'typeorm';
 import { Slot } from '../slots/slots.entity';
-import { UserSlot } from '../users-slots/users-slots.entity';
+import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from './users.entity';
 
 @Injectable()
