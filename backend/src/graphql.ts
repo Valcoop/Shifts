@@ -84,7 +84,7 @@ export interface UpdateSlotInput {
 
 export interface UpdateUserSlotInput {
     userSlotID: string;
-    fullname?: string;
+    fullName?: string;
     phoneNumber?: string;
 }
 

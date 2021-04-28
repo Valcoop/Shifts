@@ -74,7 +74,7 @@ type UpdateSlotPayload {
 
 input UpdateUserSlotInput {
   userSlotID: ID!
-  fullname: String
+  fullName: String
   phoneNumber: String
 }
 

@@ -92,11 +92,11 @@ export class SlotsResolver {
 
   @Mutation()
   async updateUserSlot(
-    @Args('input') { userSlotID, fullname, phoneNumber }: UpdateUserSlotInput,
+    @Args('input') { userSlotID, fullName, phoneNumber }: UpdateUserSlotInput,
   ): Promise<{ attendee: UserSlot }> {
     return {
       attendee: await this.slotsService.updateUserSlot(Number(userSlotID), {
-        ...(fullname != null ? { fullname } : {}),
+        ...(fullName != null ? { fullName } : {}),
         ...(phoneNumber != null ? { phoneNumber } : {}),
       }),
     };
