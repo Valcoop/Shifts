@@ -134,6 +134,7 @@ export class SlotsResolver {
 
 @Resolver('Attendee')
 export class AttendeeResolver {
+  @ResolveField()
   userSlotID(@Parent() userSlot: UserSlot) {
     return userSlot.id;
   }
