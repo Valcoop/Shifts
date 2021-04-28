@@ -25,12 +25,13 @@ export class UsersService {
     const [usersSlots, totalCount] = await Promise.all([
       this.userSlotRepository.find({
         where: {
-          ...(pagination.after && { id: LessThan(pagination.after) }),
           userID,
+          isDeleted: false,
+          ...(pagination.after && { id: LessThan(pagination.after) }),
         },
         take: pagination.first || 10,
       }),
-      this.userSlotRepository.count({ where: { userID } }),
+      this.userSlotRepository.count({ where: { userID, isDeleted: false } }),
     ]);
 
     return [
