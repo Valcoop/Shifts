@@ -8,7 +8,7 @@ import {
 } from './graphql';
 import { Job } from './jobs/jobs.entity';
 import { Slot } from './slots/slots.entity';
-import { UserSlot } from './slots/users-slots.entity';
+import { UserSlot } from './users-slots/users-slots.entity';
 import { User } from './users/users.entity';
 
 export interface UserEdge {

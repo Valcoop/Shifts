@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, LessThan, Repository } from 'typeorm';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
+import { UserSlotAbsence } from '../users-slots/users-slots-absences.entity';
+import { UserSlot } from '../users-slots/users-slots.entity';
 import { Slot } from './slots.entity';
-import { UserSlotAbsence } from './users-slots-absences.entity';
-import { UserSlot } from './users-slots.entity';
 
 interface SlotDAO {
   active: boolean;
