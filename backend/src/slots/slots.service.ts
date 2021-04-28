@@ -108,7 +108,7 @@ export class SlotsService {
     const slot = await this.slotRepository.findOne(slotID);
     // TODO: FIX ME
     if (!slot) throw new Error();
-    this.slotRepository.remove(slot);
+    await this.slotRepository.remove(slot);
 
     return slot;
   }
