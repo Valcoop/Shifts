@@ -88,7 +88,17 @@ export interface UpdateUserSlotInput {
     phoneNumber?: string;
 }
 
+export interface SlotUserSlotsInput {
+    first?: number;
+    after?: string;
+}
+
 export interface SlotAttendeesInput {
+    first?: number;
+    after?: string;
+}
+
+export interface UserUserSlotsInput {
     first?: number;
     after?: string;
 }
@@ -217,6 +227,7 @@ export interface Slot {
     startDate: Date;
     duration: number;
     job: Job;
+    userSlots: UserSlotConnection;
     attendees: AttendeeConnection;
     totalPlace: number;
     active: boolean;
@@ -240,6 +251,26 @@ export interface Attendee {
     phoneNumber: string;
 }
 
+export interface UserSlotConnection {
+    edges?: UserSlotEdge[];
+    pageInfo?: PageInfo;
+    totalCount: number;
+}
+
+export interface UserSlotEdge {
+    cursor: string;
+    node: UserSlot;
+}
+
+export interface UserSlot {
+    id: string;
+    user: User;
+    slot: Slot;
+    done: boolean;
+    fullName: string;
+    phoneNumber: string;
+}
+
 export interface UserConnection {
     edges?: UserEdge[];
     pageInfo?: PageInfo;
@@ -256,5 +287,6 @@ export interface User {
     firstname: string;
     lastname: string;
     phoneNumber: string;
+    userSlots: UserSlotConnection;
     slots: SlotConnection;
 }

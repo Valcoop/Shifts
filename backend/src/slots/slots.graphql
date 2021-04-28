@@ -82,6 +82,7 @@ type UpdateUserSlotPayload {
   attendee: Attendee!
 }
 
+# TODO: Remove me
 type SlotConnection {
   edges: [SlotEdge!]
   pageInfo: PageInfo
@@ -98,22 +99,32 @@ type Slot {
   startDate: Date!
   duration: Int!
   job: Job!
+  userSlots(input: SlotUserSlotsInput!): UserSlotConnection!
+  # TODO: Remove me
   attendees(input: SlotAttendeesInput!): AttendeeConnection!
   totalPlace: Int!
   active: Boolean!
 }
 
+input SlotUserSlotsInput {
+  first: Int
+  after: ID
+}
+
+# TODO: Remove me
 type AttendeeConnection {
   edges: [AttendeeEdge!]
   pageInfo: PageInfo
   totalCount: Int!
 }
 
+# TODO: Remove me
 type AttendeeEdge {
   cursor: ID!
   node: Attendee!
 }
 
+# TODO: Remove me
 type Attendee {
   userSlotID: ID!
   userID: String!
@@ -121,6 +132,7 @@ type Attendee {
   phoneNumber: String!
 }
 
+# TODO: Remove me
 input SlotAttendeesInput {
   first: Int
   after: ID

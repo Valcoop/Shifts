@@ -1,0 +1,19 @@
+type UserSlotConnection {
+  edges: [UserSlotEdge!]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type UserSlotEdge {
+  cursor: ID!
+  node: UserSlot!
+}
+
+type UserSlot {
+  id: ID!
+  user: User!
+  slot: Slot!
+  done: Boolean!
+  fullName: String!
+  phoneNumber: String!
+}
