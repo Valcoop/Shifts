@@ -10,7 +10,7 @@ export class UsersResolver {
 
   @Query()
   async user(@Args('userID') userID: string): Promise<User> {
-    const user = await this.userService.findOne(userID);
+    const user = await this.userService.findOne(Number(userID));
     if (!user) throw new Error();
 
     return user;

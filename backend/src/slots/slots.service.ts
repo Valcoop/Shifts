@@ -53,6 +53,10 @@ export class SlotsService {
       : slots.filter((slot, i) => userSlotsCount[i] < slot.totalPlace);
   }
 
+  findOne(slotID: number) {
+    return this.slotRepository.findOne(slotID);
+  }
+
   async book({ userID, slotID, fullName, phoneNumber }: BookSlotInput) {
     const slot = await this.slotRepository.findOne(slotID);
     // TODO: FIX ME

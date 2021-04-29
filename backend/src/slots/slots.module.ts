@@ -14,6 +14,7 @@ import { SlotsService } from './slots.service';
     JobsModule,
     UsersModule,
   ],
+  exports: [SlotsService],
   providers: [SlotsResolver, AttendeeResolver, SlotsService],
 })
 export class SlotsModule {}

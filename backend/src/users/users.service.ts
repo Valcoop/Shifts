@@ -14,7 +14,7 @@ export class UsersService {
     private userSlotRepository: Repository<UserSlot>,
   ) {}
 
-  findOne(userID: string) {
+  findOne(userID: number) {
     return this.userRepository.findOne(userID);
   }
 
