@@ -20,7 +20,8 @@
               <q-separator/>
               <time-slot-form class="q-pa-md" v-bind:timeSlot="slot" v-bind:date="slot.date" v-bind:time="slot.time"/>
               <q-card-actions align="right">
-                <q-btn color="primary" label="Modifier" @click="onModifyClick(slot.title, slot.date, slot.time, slot.duration, slot.number, slot.active)" />
+                <q-btn color="primary" label="Modifier" @click="onModifyClick(slot.id, slot.jobID, slot.date, slot.time, slot.duration, slot.number, slot.active)" />
+                <q-btn v-if="slot.participants.length==0" color="primary" label="Supprimer" @click="onDeleteClick(slot.id)" />
               </q-card-actions>
             </div>
           </template>
@@ -31,7 +32,7 @@
 </template>
 
 <script>
-import gql from 'graphql-tag'
+import { UPDATE_SLOT_MUTATION, REMOVE_SLOT_MUTATION, ADD_SLOT_MUTATION } from './../apollo/graphql'
 
 import TimeSlotForm from './TimeSlotForm.vue'
 
@@ -48,12 +49,14 @@ export default {
   data () {
     return {
       timeSlot: {
-        title: null,
         duration: 30,
         number: 1,
-        active: false
+        active: false,
+        jobID: null,
+        date: this.date,
+        time: this.time
       },
-      copyTimeSlots: { ...this.timeSlots }
+      copyTimeSlots: JSON.parse(JSON.stringify(this.timeSlots))
     }
   },
   methods: {
@@ -75,7 +78,52 @@ export default {
       this.$emit('hide')
     },
 
-    onModifyClick (title, date, time, visible, number, active) {
+    async onModifyClick (id, jobID, date, time, duration, number, active) {
+      await this.$apollo.mutate({
+        // Query
+        mutation: UPDATE_SLOT_MUTATION,
+        // Parameters
+        variables: {
+          slotID: id,
+          startDate: new Date(date + ' ' + time),
+          duration: duration,
+          jobID: jobID,
+          totalPlace: number,
+          active: active
+        }
+      })
+
+      // Emit Ok
+      this.$emit('ok')
+
+      // Notify
+      this.$q.notify({
+        color: 'green-4',
+        textColor: 'white',
+        icon: 'cloud_done',
+        message: 'Le créneau a été modifié'
+      })
+    },
+
+    async onDeleteClick (id) {
+      await this.$apollo.mutate({
+        // Query
+        mutation: REMOVE_SLOT_MUTATION,
+        // Parameters
+        variables: {
+          slotID: id
+        }
+      })
+
+      this.copyTimeSlots = this.copyTimeSlots.filter(
+        function (slot) {
+          return slot.slotID !== id
+        }
+      )
+
+      // Emit Ok
+      this.$emit('ok')
+
       // Notify
       this.$q.notify({
         color: 'green-4',
@@ -86,38 +134,41 @@ export default {
     },
 
     async onAddClick () {
-      const result = await this.$apollo.mutate({
-        // Query
-        mutation: gql`mutation ($startDate: Date!, $duration: Int!, $jobID: String!, $totalPlace: Int!, $active: Boolean!) {
-          addSlot(input: { startDate: $startDate, duration: $duration, jobID: $jobID, totalPlace: $totalPlace, active: $active}) {
-            slot {
-              id
-            }
+      if (this.timeSlot.jobID === null) {
+        this.$q.notify({
+          color: 'red-5',
+          textColor: 'white',
+          icon: 'warning',
+          message: 'Vous devez selectionner un titre'
+        })
+      } else {
+        await this.$apollo.mutate({
+          // Query
+          mutation: ADD_SLOT_MUTATION,
+          // Parameters
+          variables: {
+            startDate: new Date(this.timeSlot.date + ' ' + this.timeSlot.time),
+            duration: this.timeSlot.duration,
+            jobID: this.timeSlot.jobID,
+            totalPlace: this.timeSlot.number,
+            active: this.timeSlot.active
           }
-        }`,
-        // Parameters
-        variables: {
-          startDate: new Date(this.date + ' ' + this.time),
-          duration: this.timeSlot.duration,
-          jobID: this.timeSlot.title,
-          totalPlace: this.timeSlot.number,
-          active: this.timeSlot.active
-        }
-      })
-      
+        })
 
-      // then hiding dialog
-      this.hide()
+        // Emit Ok
+        this.$emit('ok')
 
-      console.log(this.timeSlot)
+        // then hiding dialog
+        this.hide()
 
-      // Notify
-      this.$q.notify({
-        color: 'green-4',
-        textColor: 'white',
-        icon: 'cloud_done',
-        message: 'Votre créneau a été ajouté'
-      })
+        // Notify
+        this.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'Votre créneau a été ajouté'
+        })
+      }
     },
 
     onCancelClick () {

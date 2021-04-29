@@ -17,7 +17,7 @@
         </q-item>
       </q-card-section>
       <q-card-section class='q-pa-none q-ma-none'>
-        <q-table class='no-shadow no-border' :data='timeSlots' :columns='columns'>
+        <q-table class='no-shadow no-border' :data='reservedtimeSlots' :columns='columns'>
           <template v-slot:body-cell-Horaires='props'>
             <q-td :props="props">
               <div>{{ getHoraire(props.row) }}</div>
@@ -62,6 +62,7 @@
 import QCalendar from '@quasar/quasar-ui-qcalendar'
 import ModifyTimeSlotDataDialog from 'components/ModifyTimeSlotDataDialog.vue'
 import DeleteTimeSlotDialog from 'components/DeleteTimeSlotDialog.vue'
+import { USER_QUERY } from './../apollo/graphql'
 
 export default {
   name: 'CreneauxReserves',
@@ -74,27 +75,7 @@ export default {
       weekdayFormatter: this.weekdayFormatterFunc(),
       yearFormatter: this.yearFormatterFunc(),
       locale: 'fr',
-      userId: 1234,
-      timeSlots: [
-        {
-          id: 1,
-          date: '2021-01-17',
-          time: '14:00',
-          duration: 120,
-          poste: 'Caisse',
-          name: 'Dupont Marc',
-          phone: '0787777777'
-        },
-        {
-          id: 2,
-          date: '2021-02-02',
-          time: '18:30',
-          duration: 270,
-          poste: 'Stock',
-          name: 'Martin Alexandra',
-          phone: '0899999999'
-        }
-      ],
+      reservedtimeSlots: [],
       columns: [
         {
           name: 'Horaires',
@@ -121,6 +102,49 @@ export default {
           align: 'left'
         }
       ]
+    }
+  },
+  apollo: {
+    reservedtimeSlots: {
+      query: USER_QUERY,
+        // Parameters
+        variables () {
+          return {
+            userID: this.$q.cookies.get('userId')
+          }
+        },
+        fetchPolicy: 'cache-and-network',
+      update: data => {
+        const reservedtimeSlots = []
+        const userID = data.user.id
+        for (let keySlot in data.user.slots.edges){
+          const edge = data.user.slots.edges[keySlot]
+          const options = {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            timeZone: 'Europe/Paris'
+          }
+          const formatter = new Intl.DateTimeFormat('sv-SE', options)
+          for (let keyParticipant in edge.node.attendees.edges) {
+            const participant = edge.node.attendees.edges[keyParticipant]
+            if (participant.node.userID == userID){
+              reservedtimeSlots.push(
+                { 
+                  userSlotID: participant.node.userSlotID,
+                  slotID: edge.node.id,
+                  date: formatter.format(new Date(edge.node.startDate)).slice(0, 10),
+                  time: formatter.format(new Date(edge.node.startDate)).slice(11, 16),
+                  duration: edge.node.duration,
+                  poste: edge.node.job.name,
+                  name: participant.node.fullName,
+                  phone: participant.node.phoneNumber
+                }
+              )
+            }
+          }
+        }
+        return reservedtimeSlots
+      }
     }
   },
   methods: {
@@ -186,6 +210,7 @@ export default {
           // (everything except "component" and "parent" props above):
           // apiResponse: this.resp
           id: row.id,
+          userSlotID: row.userSlotID,
           title: row.title,
           weekday: this.weekdayFormatter(timestamp, false),
           day: this.dayFormatter(timestamp, false),
@@ -198,7 +223,7 @@ export default {
           // ...more.props...
         })
         .onOk(() => {
-          console.log('OK')
+          this.$emit('update')
         })
         .onCancel(() => {
           console.log('Cancel')
@@ -226,20 +251,18 @@ export default {
           // (everything except "component" and "parent" props above):
           // apiResponse: this.resp
           id: row.id,
-          userId: this.userId,
+          userSlotID: row.userSlotID,
           title: row.title,
           weekday: this.weekdayFormatter(timestamp, false),
           day: this.dayFormatter(timestamp, false),
           month: this.monthFormatter(timestamp, false),
           year: this.yearFormatter(timestamp, false),
           startTime: row.time,
-          endTime: QCalendar.getTime(QCalendar.addToDate(timestamp, { minute: row.duration })),
-          name: row.name,
-          phone: row.phone
+          endTime: QCalendar.getTime(QCalendar.addToDate(timestamp, { minute: row.duration }))
           // ...more.props...
         })
         .onOk(() => {
-          console.log('OK')
+          this.$emit('update')
         })
         .onCancel(() => {
           console.log('Cancel')

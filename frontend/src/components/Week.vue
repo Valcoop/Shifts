@@ -8,7 +8,7 @@
         <q-btn color="primary" label="Aujourd'hui" @click="setToday" flat class="q-ml-sm"/>
       </div>
       <q-separator />
-      <div style="overflow: hidden; height: 100%;">
+      <div v-if="!this.$apollo.loading" style="overflow: hidden; height: 100%;">
         <q-calendar
           ref="calendar"
           v-model="selectedDate"
@@ -17,12 +17,11 @@
           animated
           hour24-format
           :disabled-before="disabledBefore"
-          :interval-height="25"
-          :interval-minutes="30"
-          :interval-count="32"
-          :interval-start="12"
+          :interval-height="13"
+          :interval-minutes="15"
+          :interval-count="64"
+          :interval-start="24"
           :weekdays="[1, 2, 3, 4, 5, 6, 0]"
-          @input="onModelChanged"
           @click:time2="onClickTimeDialog"
         >
           <template #head-day="{ timestamp }">
@@ -60,8 +59,8 @@
                       <span v-if="$mq === 'lg'" class="ellipsis center">{{ event.title }}</span>
                     </q-card-section>
                     <div v-if="event.participants && $mq === 'lg' && event.duration >= 60" class="q-pl-xs">
-                      <q-btn size="4px" v-for="participant in event.participants" v-bind:key="participant" round color="grey" icon="fas fa-user-alt" disable>
-                        <q-tooltip content-class="bg-accent">{{ participant }}</q-tooltip>
+                      <q-btn size="4px" v-for="participant in event.participants" v-bind:key="participant.fullName" round color="grey" icon="fas fa-user-alt" disable>
+                        <q-tooltip content-class="bg-accent">{{ participant.fullName }}</q-tooltip>
                       </q-btn>
                       <q-btn size="4px" v-for="index in (event.number - event.participants.length)" :key="index" round color="secondary" icon="fas fa-plus" />
                     </div>
@@ -78,6 +77,7 @@
 import QCalendar from '@quasar/quasar-ui-qcalendar'
 import RegisterTimeSlotDialog from 'components/RegisterTimeSlotDialog.vue'
 import AddTimeSlotDialog from 'components/AddTimeSlotDialog.vue'
+import { ACTIVE_PARAM_SLOTS_QUERY } from './../apollo/graphql'
 
 const CURRENT_DAY = new Date()
 
@@ -146,9 +146,21 @@ function luminosity (color) {
   return 0.2126 * R + 0.7152 * G + 0.0722 * B
 }
 
+function startOfWeek(date){
+  var date = new Date(date)
+  var diff = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1)
+  return new Date(date.setDate(diff))
+}
+
+function endOfWeek(date){
+  var date = new Date(date)
+  var lastday = date.getDate() - (date.getDay() - 1) + 7
+  return new Date(date.setDate(lastday))
+}
+
 export default {
   props: {
-    timeSlots: Array,
+    active: Boolean,
     type: String
   },
   data () {
@@ -161,36 +173,67 @@ export default {
       weekdayFormatter: this.weekdayFormatterFunc(),
       yearFormatter: this.yearFormatterFunc(),
       locale: 'fr',
-      events: []
+      events: [],
+      timeSlots: [],
+      userID: this.$q.cookies.get('userId')
+    }
+  },
+  apollo: {
+    timeSlots: {
+      query: ACTIVE_PARAM_SLOTS_QUERY,
+        // Parameters
+        variables () {
+          return {
+            startDate: startOfWeek(this.selectedDate),
+            endDate: endOfWeek(this.selectedDate),
+            active: this.active
+          }
+        },
+        fetchPolicy: 'cache-and-network',
+      update: data => {
+        var slots = []
+        data.slots.forEach(
+          function(slot){
+            const participants = []
+            slot.attendees.edges.forEach(function(edge){participants.push({fullName: edge.node.fullName, userSlotID: edge.node.userSlotID})})
+            const options = {
+              year: 'numeric', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit', second: '2-digit',
+              timeZone: 'Europe/Paris'
+            }
+            const formatter = new Intl.DateTimeFormat('sv-SE', options)
+            slots.push(
+              { 
+                id: slot.id,
+                title: slot.job.name,
+                date: formatter.format(new Date(slot.startDate)).slice(0, 10),
+                time: formatter.format(new Date(slot.startDate)).slice(11, 16),
+                duration: slot.duration,
+                bgcolor: slot.job.color,
+                number: slot.totalPlace,
+                participants: participants,
+                active: slot.active,
+                jobID: slot.job.id
+              }
+            )
+          }
+        )
+        return slots
+      }
     }
   },
   methods: {
-    calendarNext () {
-      this.$refs.calendar.next()
+    async calendarNext () {
+      await this.$refs.calendar.next()
+      await this.$apollo.queries.timeSlots.refetch()
     },
-    calendarPrev () {
-      this.$refs.calendar.prev()
+    async calendarPrev () {
+      await this.$refs.calendar.prev()
+      await this.$apollo.queries.timeSlots.refetch()
     },
-    setToday () {
-      this.$refs.calendar.moveToToday()
-    },
-    onModelChanged (date) {
-      this.events.unshift(`Model changed: ${date}`)
-    },
-    onClickDate2 (data) {
-      this.events.unshift(`click:date2: ${JSON.stringify(data)}`)
-    },
-    onClickDayHeader2 (data) {
-      this.events.unshift(`click:day:header2: ${JSON.stringify(data)}`)
-    },
-    onClickInterval2 (data) {
-      this.events.unshift(`click:interval2: ${JSON.stringify(data)}`)
-    },
-    onClickTime2 (data) {
-      this.events.unshift(`click:time2: ${JSON.stringify(data)}`)
-    },
-    onClickIntervalHeader2 (data) {
-      this.events.unshift(`click:interval:header2: ${JSON.stringify(data)}`)
+    async setToday () {
+      await this.$refs.calendar.moveToToday()
+      await this.$apollo.queries.timeSlots.refetch()
     },
     getHeadDay (timestamp) {
       return `${timestamp.date}`
@@ -275,7 +318,6 @@ export default {
       const todayTimeSlots = this.timeSlots.filter(function (el) {
         return el.date === dt
       })
-      console.log(todayTimeSlots)
       todayTimeSlots.sort((a, b) => (QCalendar.parsed(a.date + ' ' + a.time) > QCalendar.parsed(b.date + ' ' + b.time)) ? 1 : ((QCalendar.parsed(a.date + ' ' + a.time) < QCalendar.parsed(b.date + ' ' + b.time)) ? -1 : 0))
       for (let i = 0; i < todayTimeSlots.length; ++i) {
         if (todayTimeSlots[i].time) {
@@ -351,6 +393,8 @@ export default {
             // props forwarded to component
             // (everything except "component" and "parent" props above):
             // apiResponse: this.resp
+            id: event.id,
+            userID: this.userID,
             title: event.title,
             weekday: this.weekdayFormatter(timestamp, false),
             day: this.dayFormatter(timestamp, false),
@@ -363,7 +407,7 @@ export default {
             // ...more.props...
           })
           .onOk(() => {
-            console.log('OK')
+            this.$apollo.queries.timeSlots.refetch()
           })
           .onCancel(() => {
             console.log('Cancel')
@@ -391,10 +435,14 @@ export default {
       const timeSplit = time.split(':')
       const hour = timeSplit[0]
       var minutes = parseInt(timeSplit[1])
-      if (minutes < 30) {
+      if (minutes < 15) {
         minutes = '00'
-      } else {
+      } else if (minutes>=15 && minutes<30){
+        minutes = '15'
+      } else if (minutes>=30 && minutes<45 ){
         minutes = '30'
+      } else {
+        minutes = '45'
       }
       return hour + ':' + minutes
     },
@@ -424,7 +472,7 @@ export default {
             // ...more.props...
           })
           .onOk(() => {
-            console.log('OK')
+            this.$apollo.queries.timeSlots.refetch()
           })
           .onCancel(() => {
             console.log('Cancel')

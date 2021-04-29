@@ -9,7 +9,7 @@
         <q-form class="q-gutter-md">
           <q-input
             filled
-            v-model="name"
+            v-model="fullName"
             label="Votre nom et prénom"
             lazy-rules
             :rules="[ val => val && val.length > 0 || 'Champ obligatoire']"
@@ -17,7 +17,7 @@
 
           <q-input
             filled
-            v-model="phone"
+            v-model="phoneNumber"
             label="Phone"
             mask="## ## ## ## ##"
             unmasked-value
@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import { UPDATE_USER_SLOT_MUTATION } from './../apollo/graphql'
+
 export default {
   props: {
     id: Number,
@@ -43,7 +45,14 @@ export default {
     startTime: String,
     endTime: String,
     name: String,
-    phone: String
+    phone: String,
+    userSlotID: String
+  },
+  data () {
+    return {
+      fullName: this.name,
+      phoneNumber: this.phone
+    }
   },
   methods: {
     // following method is REQUIRED
@@ -64,7 +73,7 @@ export default {
       this.$emit('hide')
     },
 
-    onOKClick () {
+    async onOKClick () {
       if (this.name === null || this.phone === null) {
         this.$q.notify({
           color: 'red-5',
@@ -73,6 +82,17 @@ export default {
           message: 'Vous devez remplir les deux champs nom et numéro de téléphone'
         })
       } else {
+        await this.$apollo.mutate({
+          // Query
+          mutation: UPDATE_USER_SLOT_MUTATION,
+          // Parameters
+          variables: {
+            userSlotID: this.userSlotID,
+            fullName: this.fullName,
+            phoneNumber: this.phoneNumber
+          }
+        })
+
         // on OK, it is REQUIRED to
         // emit "ok" event (with optional payload)
         // before hiding the QDialog

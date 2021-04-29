@@ -40,7 +40,7 @@
             <q-item-label>Planning</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item to="/admin" active-class="q-item-no-link-highlighting">
+        <q-item v-if="isAdmin=='1'" to="/admin" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="fas fa-tools"/>
           </q-item-section>
@@ -62,8 +62,15 @@ export default {
   name: 'MainLayout',
   data () {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen: false,
+      isAdmin: this.$q.cookies.get('isAdmin')
     }
+  },
+  mounted () {
+    this.$q.cookies.set('userId', 1, { path: '/' })
+    this.$q.cookies.set('isAdmin', 1, { path: '/' })
+    // this.$q.cookies.set('userId', 2, { path: '/' })
+    // this.$q.cookies.set('isAdmin', 0, { path: '/' })
   }
 }
 </script>

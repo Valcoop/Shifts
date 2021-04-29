@@ -1,6 +1,6 @@
 <template>
-  <q-dialog ref="dialog" @hide="onDialogHide">
-    <q-card class="q-dialog-plugin">
+  <q-dialog ref="registerDialog" @hide="onDialogHide">
+    <q-card v-if="!this.$apollo.loading" class="q-dialog-plugin">
       <q-card-actions align="right">
         <q-btn icon="close" flat round dense @click="onCancelClick" />
       </q-card-actions>
@@ -9,14 +9,14 @@
         <h6 v-else>Ce créneau est actuellement complet</h6>
         <div class="q-pb-xs">Participants actuels : {{ participants.length }}/{{ number }}</div>
         <div v-if="participants.length > 0" class="q-pl-md q-pr-md q-pb-md">
-          <q-btn size="10px" v-for="participant in participants" v-bind:key="participant" round color="grey" icon="fas fa-user-alt" class="q-ma-sm" disable>
-            <q-tooltip content-class="bg-accent">{{ participant }}</q-tooltip>
+          <q-btn size="10px" v-for="participant in participants" v-bind:key="participant.fullName" round color="grey" icon="fas fa-user-alt" class="q-ma-sm" disable>
+            <q-tooltip content-class="bg-accent">{{ participant.fullName }}</q-tooltip>
           </q-btn>
         </div>
         <q-form v-if="number != participants.length" class="q-gutter-md">
           <q-input
             filled
-            v-model="name"
+            v-model="user.fullName"
             label="Votre nom et prénom"
             lazy-rules
             :rules="[ val => val && val.length > 0 || 'Champ obligatoire']"
@@ -24,7 +24,7 @@
 
           <q-input
             filled
-            v-model="phone"
+            v-model="user.phoneNumber"
             label="Phone"
             mask="## ## ## ## ##"
             unmasked-value
@@ -39,8 +39,12 @@
 </template>
 
 <script>
+import { BOOK_SLOT_MUTATION, USER_QUERY } from './../apollo/graphql'
+
 export default {
   props: {
+    id: String,
+    userID: Number,
     title: String,
     weekday: String,
     day: String,
@@ -56,21 +60,34 @@ export default {
   },
   data () {
     return {
-      name: null,
-      phone: null
+      user: null
+    }
+  },
+  apollo: {
+    user: {
+      query: USER_QUERY,
+      // Parameters
+      variables () {
+        return {
+          userID: this.userID
+        }
+      },
+      update: data => {
+        return { fullName: data.user.lastname + ' ' + data.user.firstname, phoneNumber: data.user.phoneNumber }
+      }
     }
   },
   methods: {
     // following method is REQUIRED
     // (don't change its name --> "show")
     show () {
-      this.$refs.dialog.show()
+      this.$refs.registerDialog.show()
     },
 
     // following method is REQUIRED
     // (don't change its name --> "hide")
     hide () {
-      this.$refs.dialog.hide()
+      this.$refs.registerDialog.hide()
     },
 
     onDialogHide () {
@@ -79,8 +96,8 @@ export default {
       this.$emit('hide')
     },
 
-    onOKClick () {
-      if (this.name === null || this.phone === null) {
+    async onOKClick () {
+      if (this.user === null || this.user?.phoneNumber === null || this.user?.fullName === null) {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
@@ -88,6 +105,17 @@ export default {
           message: 'Vous devez remplir les deux champs nom et numéro de téléphone'
         })
       } else {
+        await this.$apollo.mutate({
+          // Query
+          mutation: BOOK_SLOT_MUTATION,
+          // Parameters
+          variables: {
+            userID: String(this.userID),
+            slotID: this.id,
+            fullName: this.user.fullName,
+            phoneNumber: this.user.phoneNumber
+          }
+        })
         // on OK, it is REQUIRED to
         // emit "ok" event (with optional payload)
         // before hiding the QDialog

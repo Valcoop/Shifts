@@ -1,19 +1,11 @@
 <template>
   <div>
-    <q-select filled 
-        v-model="timeSlot.title" 
-        :options="jobs" 
-        label="Titre" 
-        option-value="id"
-        option-label="name"
-        emit-value
-        map-options 
-        :rules="[val => !!val || 'Field is required']"/>
-    <q-input filled v-model="date" mask="date" label="Date" :rules="['date']">
+    <q-select filled v-model="timeSlot.jobID" :options="jobs" label="Titre" option-value="id" option-label="name" emit-value map-options :rules="[val => !!val || 'Champ obligatoire']"/>
+    <q-input filled v-model="timeSlot.date" mask="date" label="Date" :rules="['date']">
       <template v-slot:append>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
-            <q-date v-model="date" :locale="myLocale">
+            <q-date v-model="timeSlot.date" :locale="myLocale" first-day-of-week="1">
               <div class="row items-center justify-end">
                 <q-btn v-close-popup label="Close" color="primary" flat />
               </div>
@@ -22,11 +14,11 @@
         </q-icon>
       </template>
     </q-input>
-    <q-input filled v-model="time" mask="time" label="Début du créneau" :rules="['time']">
+    <q-input filled v-model="timeSlot.time" mask="time" label="Début du créneau" :rules="['time']">
       <template v-slot:append>
         <q-icon name="access_time" class="cursor-pointer">
           <q-popup-proxy transition-show="scale" transition-hide="scale">
-            <q-time v-model="time">
+            <q-time v-model="timeSlot.time" :minute-options="[0,15,30,45]">
               <div class="row items-center justify-end">
                 <q-btn v-close-popup label="Close" color="primary" flat />
               </div>
@@ -39,7 +31,7 @@
       v-model.number="timeSlot.duration"
       type="number"
       :min=30
-      step=30
+      step=15
       label="Durée (minutes)"
       filled
       :rules="[val => !!val || 'Field is required']"
@@ -61,7 +53,7 @@
 </template>
 
 <script>
-import gql from 'graphql-tag'
+import { JOBS_QUERY } from './../apollo/graphql'
 
 export default {
   props: {
@@ -73,37 +65,27 @@ export default {
     return {
       jobs: [],
       myLocale: {
-        days: 'Lundi_Mardi_Mercredi_Jeudi_Vendredi_Samedi_Dimanche'.split('_'),
-        daysShort: 'Lun_Mar_Mer_Jeu_Ven_Sam_Dim'.split('_'),
+        days: 'Dimanche_Lundi_Mardi_Mercredi_Jeudi_Vendredi_Samedi'.split('_'),
+        daysShort: 'Dim_Lun_Mar_Mer_Jeu_Ven_Sam'.split('_'),
         months: 'Janvier_Fevrier_Mars_Avril_Mai_Juin_Juillet_Aout_Septembre_Octobre_Novembre_Decembre'.split('_'),
-        monthsShort: 'Janv_Fevr_Mars_Avril_Mai_Juin_Juil_Aout_Sept_Oct_Nov_Dec'.split('_'),
-        firstDayOfWeek: 0
+        monthsShort: 'Janv_Fevr_Mars_Avril_Mai_Juin_Juil_Aout_Sept_Oct_Nov_Dec'.split('_')
       }
     }
   },
   apollo: {
     jobs: {
-      query: gql`query {
-        jobs(input: {}){
-          edges{
-            node{
-              id 
-              name
-            }
-          }
-        }
-      }`,
+      query: JOBS_QUERY,
       update: data => {
         var jobs = []
         data.jobs.edges.forEach(
-          function(edge){
-            jobs.push({id: edge.node.id, name: edge.node.name})
+          function (edge) {
+            jobs.push({ id: edge.node.id, name: edge.node.name })
           }
         )
         return jobs
       }
     }
-  },
+  }
 }
 </script>
 

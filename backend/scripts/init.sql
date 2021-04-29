@@ -69,3 +69,5 @@ CREATE TABLE `user_slots` (
   FOREIGN KEY (slotID) REFERENCES slots(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   FOREIGN KEY (userSlotAbsenceID) REFERENCES `user_slots_absences`(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
+
+INSERT INTO `absence_types` (reason) VALUE ('Autres');

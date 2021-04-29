@@ -17,7 +17,7 @@
         </q-item>
       </q-card-section>
       <q-card-section class='q-pa-none q-ma-none'>
-        <q-table class='no-shadow no-border' :data='timeSlots' :columns='columns'>
+        <q-table class='no-shadow no-border' :data='nextTimeSlots' :columns='columns'>
           <template v-slot:body-cell-Horaires='props'>
             <q-td :props="props">
               <div>{{ getHoraire(props.row) }}</div>
@@ -35,8 +35,8 @@
           <template v-slot:body-cell-Actions="props">
             <q-td :props="props">
               <div class="row">
-                <q-btn v-for="participant in props.row.participants" v-bind:key="participant" round class='q-pa-sm q-ma-sm' color="grey" icon="fas fa-user-alt" disable>
-                  <q-tooltip content-class="bg-accent">{{ participant }}</q-tooltip>
+                <q-btn v-for="participant in props.row.participants" v-bind:key="participant.fullName" round class='q-pa-sm q-ma-sm' color="grey" icon="fas fa-user-alt" disable>
+                  <q-tooltip content-class="bg-accent">{{ participant.fullName }}</q-tooltip>
                 </q-btn>
                 <q-btn v-for="index in (props.row.number - props.row.participants.length)" :key="index" round class='q-pa-sm q-ma-sm' color="secondary" icon="fas fa-plus" @click="showDialog(props.row)"/>
               </div>
@@ -50,44 +50,21 @@
 <script>
 import QCalendar from '@quasar/quasar-ui-qcalendar'
 import RegisterTimeSlotDialog from 'components/RegisterTimeSlotDialog.vue'
+import { ACTIVE_NON_FULL_SLOTS_QUERY } from './../apollo/graphql'
 
 export default {
   name: 'ListProchainsCreneaux',
   data () {
     return {
       slide: 1,
+      userID: this.$q.cookies.get('userId'),
       tab: 'horaires',
       monthFormatter: this.monthFormatterFunc(),
       dayFormatter: this.dayFormatterFunc(),
       weekdayFormatter: this.weekdayFormatterFunc(),
       yearFormatter: this.yearFormatterFunc(),
       locale: 'fr',
-      timeSlots: [
-        {
-          id: 1,
-          title: 'Meeting',
-          details: 'Time to pitch my idea to the company',
-          date: '2021-03-29',
-          time: '10:00',
-          duration: 120,
-          bgcolor: 'red',
-          icon: 'fas fa-handshake',
-          number: 5,
-          participants: ['Dupont Nicole', 'Martin Kevin']
-        },
-        {
-          id: 2,
-          title: 'Test2',
-          details: 'Company is paying!',
-          date: '2021-03-29',
-          time: '18:30',
-          duration: 30,
-          bgcolor: 'teal',
-          icon: 'fas fa-hamburger',
-          number: 5,
-          participants: ['Dupont Nicole', 'Martin Kevin']
-        }
-      ],
+      nextTimeSlots: [],
       columns: [
         {
           name: 'Horaires',
@@ -108,7 +85,61 @@ export default {
       ]
     }
   },
+  apollo: {
+    nextTimeSlots: {
+      query: ACTIVE_NON_FULL_SLOTS_QUERY,
+      variables () {
+        return {
+          startDate: new Date(),
+          endDate: this.endDate()
+        }
+      },
+      fetchPolicy: 'cache-and-network',
+      update: data => {
+        const nextTimeSlots = []
+        const options = {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZone: 'Europe/Paris'
+        }
+        const formatter = new Intl.DateTimeFormat('sv-SE', options)
+        data.slots.forEach(
+          function (slot) {
+            const participants = []
+            slot.attendees.edges.forEach(
+              function (edge) {
+                participants.push({ userSlotId: edge.node.userSlotId, fullName: edge.node.fullName })
+              }
+            )
+            nextTimeSlots.push(
+              {
+                id: slot.id,
+                title: slot.job.name,
+                date: formatter.format(new Date(slot.startDate)).slice(0, 10),
+                time: formatter.format(new Date(slot.startDate)).slice(11, 16),
+                duration: slot.duration,
+                bgcolor: slot.job.color,
+                number: slot.totalPlace,
+                participants: participants
+              }
+            )
+          }
+        )
+        return nextTimeSlots
+      }
+    }
+  },
   methods: {
+    endDate () {
+      var myCurrentDate = new Date()
+      var endDate = new Date(myCurrentDate)
+      endDate.setDate(endDate.getDate() + 30)
+      return endDate
+    },
     monthFormatterFunc () {
       const longOptions = { timeZone: 'UTC', month: 'long' }
       const shortOptions = { timeZone: 'UTC', month: 'short' }
@@ -138,7 +169,6 @@ export default {
     },
     yearFormatterFunc () {
       const options = { timeZone: 'UTC', year: 'numeric' }
-
       return QCalendar.createNativeLocaleFormatter(
         this.locale,
         (_tms, short) => short ? options : options
@@ -170,6 +200,8 @@ export default {
           // props forwarded to component
           // (everything except "component" and "parent" props above):
           // apiResponse: this.resp
+          id: row.id,
+          userID: this.userID,
           title: row.title,
           weekday: this.weekdayFormatter(timestamp, false),
           day: this.dayFormatter(timestamp, false),
@@ -182,7 +214,7 @@ export default {
           // ...more.props...
         })
         .onOk(() => {
-          console.log('OK')
+          this.$emit('update')
         })
         .onCancel(() => {
           console.log('Cancel')

@@ -7,14 +7,13 @@
       <q-card-section>
         <div align="center"><q-icon color='primary' name='fas fa-exclamation-triangle' size='44px' /></div>
         <h6>Vous êtes sur le point de vous désinscrire du créneau <span style="color: #268381">{{ title }}</span> du <span style="color: #268381">{{ weekday }} {{ day }} {{ month }} {{ year }}</span> de <span style="color: #268381">{{ startTime }}</span> à <span style="color: #268381">{{ endTime }}</span></h6>
-        <q-select filled v-model="motif" :options="motifs" label="Motif" :rules="[val => !!val || 'Champ obligatoire']"/>
+        <q-select filled v-model="absenceType" :options="absenceTypes" label="Motif" option-value="id" option-label="reason" emit-value map-options :rules="[val => !!val || 'Champ obligatoire']"/>
         <q-input
-          v-model="details"
+          v-model="description"
           filled
           type="textarea"
-          label="Détails"
-          shadow-text="Champ obligatoire pour le motif Autres"
-          :rules="[val => motif === 'Autres' ? !!val : 1  || 'Champ obligatoire quand le motif est Autres']"
+          label="Détails (Obligatoire pour le motif Autres)"
+          :rules="[val => absenceType === 'Autres' ? !!val : 1  || 'Champ obligatoire quand le motif est Autres']"
         />
       </q-card-section>
       <q-card-actions align="right">
@@ -25,24 +24,39 @@
 </template>
 
 <script>
+import { ABSENCE_TYPES_QUERY, CANCEL_BOOK_SLOT_MUTATION } from './../apollo/graphql'
+
 export default {
   props: {
-    id: Number,
-    userId: Number,
+    id: String,
+    userSlotID: String,
     title: String,
     weekday: String,
     day: String,
     month: String,
     year: String,
     startTime: String,
-    endTime: String,
-    number: Number
+    endTime: String
   },
   data () {
     return {
-      motifs: ['Maladie', 'Autres'],
-      motif: null,
-      details: null
+      absenceTypes: [],
+      absenceType: null,
+      description: null
+    }
+  },
+  apollo: {
+    absenceTypes: {
+      query: ABSENCE_TYPES_QUERY,
+      update: data => {
+        var absenceTypes = []
+        data.absenceTypes.edges.forEach(
+          function (edge) {
+            absenceTypes.push({ id: edge.node.id, reason: edge.node.reason })
+          }
+        )
+        return absenceTypes
+      }
     }
   },
   methods: {
@@ -64,22 +78,33 @@ export default {
       this.$emit('hide')
     },
 
-    onOKClick () {
-      if (this.motif === null) {
+    async onOKClick () {
+      if (this.absenceType === null) {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
           icon: 'warning',
           message: 'Vous devez selectionner un motif'
         })
-      } else if (this.motif === 'Autres' && this.details === null) {
+      } else if (this.absenceType === '1' && this.description === null) {
         this.$q.notify({
           color: 'red-5',
           textColor: 'white',
           icon: 'warning',
-          message: 'Vous devez renseigner un détail lorsque le motif est Autres'
+          message: 'Vous devez renseignez un détail pour le motif Autres'
         })
       } else {
+        await this.$apollo.mutate({
+          // Query
+          mutation: CANCEL_BOOK_SLOT_MUTATION,
+          // Parameters
+          variables: {
+            userSlotID: this.userSlotID,
+            absenceTypeID: this.absenceType,
+            description: this.description
+          }
+        })
+
         // on OK, it is REQUIRED to
         // emit "ok" event (with optional payload)
         // before hiding the QDialog
