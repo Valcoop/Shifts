@@ -48,7 +48,7 @@ export class SlotsService {
 
     const userSlotsCount = await Promise.all(
       slots.map((slot) =>
-        this.userSlotRepository.count({ isDeleted: false, slotID: slot.id }),
+        this.userSlotRepository.count({ isDeleted: false, slot }),
       ),
     );
 
@@ -87,7 +87,9 @@ export class SlotsService {
     absenceTypeID,
     description,
   }: CancelBookedSlotInput) {
-    const userSlot = await this.userSlotRepository.findOne(userSlotID);
+    const userSlot = await this.userSlotRepository.findOne(userSlotID, {
+      relations: ['slot'],
+    });
     // TODO: FIX ME
     if (!userSlot) throw new Error();
 
@@ -105,10 +107,7 @@ export class SlotsService {
       isDeleted: true,
     });
 
-    const slot = await this.slotRepository.findOne(userSlot.slotID);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-    return slot;
+    return userSlot.slot;
   }
 
   save(slotDAO: SlotDAO) {

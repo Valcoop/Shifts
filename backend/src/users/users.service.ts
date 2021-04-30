@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Slot } from '../slots/slots.entity';
+import { buildPaginator } from 'typeorm-cursor-pagination';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from './users.entity';
-import { buildPaginator } from 'typeorm-cursor-pagination';
 
 @Injectable()
 export class UsersService {
   constructor(
-    // @ts-ignore
-    @InjectRepository(Slot) private slotRepository: Repository<Slot>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserSlot)
     private userSlotRepository: Repository<UserSlot>,

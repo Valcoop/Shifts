@@ -20,8 +20,6 @@ export class UserSlot {
   @ManyToOne(() => Slot, (slot) => slot.userSlots)
   @JoinColumn({ name: 'slotID' })
   slot: Slot;
-  // TODO: needed ???
-  slotID: number;
 
   @Column()
   startDate: Date;
