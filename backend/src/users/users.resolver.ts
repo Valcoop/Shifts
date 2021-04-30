@@ -3,6 +3,7 @@ import { UserUserSlotsInput } from '../graphql';
 import { UserSlotConnection } from '../graphql-types';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
+import { btoa } from '../utils';
 
 @Resolver('User')
 export class UsersResolver {
@@ -33,8 +34,9 @@ export class UsersResolver {
     return {
       totalCount,
       edges: userSlots.map((userSlot) => ({
-        // TODO: base64 me
-        cursor: userSlot.id.toString(),
+        cursor: `id:${btoa(userSlot.id.toString())},startDate:${btoa(
+          userSlot.startDate.getTime().toString(),
+        )}`,
         node: userSlot,
       })),
       pageInfo: {
