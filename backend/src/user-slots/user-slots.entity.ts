@@ -8,14 +8,16 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Slot } from '../slots/slots.entity';
+import { User } from '../users/users.entity';
 
 @Entity('user_slots')
 export class UserSlot {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  userID: number;
+  @ManyToOne(() => User, (user) => user.userSlots)
+  @JoinColumn({ name: 'userID' })
+  user: User;
 
   @ManyToOne(() => Slot, (slot) => slot.userSlots)
   @JoinColumn({ name: 'slotID' })

@@ -5,6 +5,7 @@ import { buildPaginator } from 'typeorm-cursor-pagination';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
 import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
+import { User } from '../users/users.entity';
 import { Slot } from './slots.entity';
 
 interface SlotDAO {
@@ -28,6 +29,7 @@ interface UserSlotDAO {
 export class SlotsService {
   constructor(
     @InjectRepository(Slot) private slotRepository: Repository<Slot>,
+    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserSlot)
     private userSlotRepository: Repository<UserSlot>,
     @InjectRepository(UserSlotAbsence)
@@ -62,22 +64,26 @@ export class SlotsService {
   }
 
   async book({ userID, slotID, fullName, phoneNumber }: BookSlotInput) {
-    const slot = await this.slotRepository.findOne({
-      where: { id: slotID, isDeleted: false },
-    });
+    const [slot, user] = await Promise.all([
+      this.slotRepository.findOne({ where: { id: slotID, isDeleted: false } }),
+      this.userRepository.findOne({ where: { id: userID } }),
+    ]);
     // TODO: FIX ME
     if (!slot) throw new Error();
+    // TODO: FIX ME
+    if (!user) throw new Error();
 
-    const userSlotEntity = this.userSlotRepository.create({
-      done: false,
-      userID: Number(userID),
-      slot,
-      fullName,
-      phoneNumber,
-      startDate: slot.startDate,
-      isDeleted: false,
-    });
-    await this.userSlotRepository.save(userSlotEntity);
+    await this.userSlotRepository.save(
+      this.userSlotRepository.create({
+        done: false,
+        user,
+        slot,
+        fullName,
+        phoneNumber,
+        startDate: slot.startDate,
+        isDeleted: false,
+      }),
+    );
 
     return slot;
   }
@@ -88,14 +94,14 @@ export class SlotsService {
     description,
   }: CancelBookedSlotInput) {
     const userSlot = await this.userSlotRepository.findOne(userSlotID, {
-      relations: ['slot'],
+      relations: ['slot', 'user'],
     });
     // TODO: FIX ME
     if (!userSlot) throw new Error();
 
     const userSlotAbsence = await this.userSlotAbsenceRepository.save(
       this.userSlotAbsenceRepository.create({
-        userID: userSlot.userID,
+        userID: userSlot.user.id,
         absenceTypeID: Number(absenceTypeID),
         description,
       }),

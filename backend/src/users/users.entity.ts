@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { UserSlot } from '../user-slots/user-slots.entity';
 
 @Entity('users')
 export class User {
@@ -28,4 +30,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => UserSlot, (userSlot) => userSlot.slot)
+  userSlots: UserSlot[];
 }
