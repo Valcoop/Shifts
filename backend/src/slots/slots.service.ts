@@ -20,6 +20,7 @@ interface SlotDAO {
 interface UserSlotDAO {
   fullName: string;
   phoneNumber: string;
+  startDate: Date;
 }
 
 @Injectable()
@@ -69,9 +70,10 @@ export class SlotsService {
     const userSlotEntity = this.userSlotRepository.create({
       done: false,
       userID: Number(userID),
-      slotID: Number(slotID),
+      slot,
       fullName,
       phoneNumber,
+      startDate: slot.startDate,
       isDeleted: false,
     });
     await this.userSlotRepository.save(userSlotEntity);

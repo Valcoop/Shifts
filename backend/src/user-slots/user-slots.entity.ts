@@ -24,6 +24,9 @@ export class UserSlot {
   slotID: number;
 
   @Column()
+  startDate: Date;
+
+  @Column()
   done: boolean;
 
   @Column()

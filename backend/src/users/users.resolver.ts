@@ -21,9 +21,13 @@ export class UsersResolver {
     @Parent() user: User,
     @Args('input') input: UserUserSlotsInput,
   ): Promise<UserSlotConnection> {
-    const userSlots = await this.userService.getUserSlots(user.id, {
-      startDate: input.stardDate,
-    });
+    // @ts-ignore
+    const { data: userSlots, cursor } = await this.userService.getUserSlots(
+      user.id,
+      { startDate: input.stardDate },
+      { first: input.first, after: input.after },
+    );
+
     return {
       totalCount: 0,
       edges: userSlots.map((userSlot) => ({

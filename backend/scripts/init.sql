@@ -59,6 +59,7 @@ CREATE TABLE `user_slots` (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
   userID INT NOT NULL,
   slotID INT NOT NULL,
+  startDate DATETIME NOT NULL,
   done BOOLEAN NOT NULL,
   userSlotAbsenceID INT,
   isDeleted BOOLEAN NOT NULL,
