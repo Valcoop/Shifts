@@ -1,7 +1,6 @@
 import { AbsenceType } from './absence-types/absence-types.entity';
 import {
   AbsenceTypeConnection as GraphQLAbsenceTypeConnection,
-  AttendeeConnection as GraphQLAttendeeConnection,
   JobConnection as GraphQLJobConnection,
   UserConnection as GraphQLUserConnection,
   UserSlotConnection as GraphQLUserSlotConnection,
@@ -46,14 +45,4 @@ export interface UserSlotEdge {
 export interface UserSlotConnection
   extends Omit<GraphQLUserSlotConnection, 'edges'> {
   edges?: UserSlotEdge[];
-}
-
-export interface AttendeeEdge {
-  cursor: string;
-  node: UserSlot;
-}
-
-export interface AttendeeConnection
-  extends Omit<GraphQLAttendeeConnection, 'edges'> {
-  edges?: AttendeeEdge[];
 }

@@ -5,7 +5,7 @@ import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { UsersModule } from '../users/users.module';
 import { Slot } from './slots.entity';
-import { AttendeeResolver, SlotsResolver } from './slots.resolver';
+import { SlotsResolver } from './slots.resolver';
 import { SlotsService } from './slots.service';
 
 @Module({
@@ -15,6 +15,6 @@ import { SlotsService } from './slots.service';
     UsersModule,
   ],
   exports: [SlotsService],
-  providers: [SlotsResolver, AttendeeResolver, SlotsService],
+  providers: [SlotsResolver, SlotsService],
 })
 export class SlotsModule {}

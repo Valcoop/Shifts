@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, LessThan, Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
+import { buildPaginator } from 'typeorm-cursor-pagination';
 import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
 import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
@@ -125,21 +126,41 @@ export class SlotsService {
     );
   }
 
-  async getAttendeesAndCount(
+  countUserSlots(slotID: number) {
+    return this.userSlotRepository
+      .createQueryBuilder('user_slot')
+      .innerJoinAndSelect('user_slot.slot', 'slot')
+      .where('user_slot.slotID = :slotID', { slotID })
+      .andWhere('user_slot.isDeleted = false')
+      .andWhere('slot.isDeleted = false')
+      .andWhere('user_slot.userSlotAbsenceID IS NULL')
+      .getCount();
+  }
+
+  getUserSlots(
     slotID: number,
-    pagination: { first?: number; after?: string },
-  ): Promise<[UserSlot[], number]> {
-    return Promise.all([
-      this.userSlotRepository.find({
-        where: {
-          slotID,
-          isDeleted: false,
-          ...(pagination.after && { id: LessThan(pagination.after) }),
-        },
-        take: pagination.first || 10,
-      }),
-      this.userSlotRepository.count({ where: { slotID, isDeleted: false } }),
-    ]);
+    pagination?: { first?: number; after?: string },
+  ) {
+    const queryBuilder = this.userSlotRepository
+      .createQueryBuilder('user_slot')
+      .innerJoinAndSelect('user_slot.slot', 'slot')
+      .where('user_slot.slotID = :slotID', { slotID })
+      .andWhere('user_slot.isDeleted = false')
+      .andWhere('slot.isDeleted = false')
+      .andWhere('user_slot.userSlotAbsenceID IS NULL');
+
+    const nextPaginator = buildPaginator({
+      entity: UserSlot,
+      alias: 'user_slot',
+      paginationKeys: ['id'],
+      query: {
+        limit: pagination?.first || 10,
+        order: 'ASC',
+        afterCursor: pagination?.after,
+      },
+    });
+
+    return nextPaginator.paginate(queryBuilder);
   }
 
   // UserSlot

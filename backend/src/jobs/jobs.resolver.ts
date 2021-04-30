@@ -6,6 +6,7 @@ import {
   UpdateJobInput,
 } from '../graphql';
 import { JobConnection } from '../graphql-types';
+import { btoa } from '../utils';
 import { Job } from './jobs.entity';
 import { JobsService } from './jobs.service';
 

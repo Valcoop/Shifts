@@ -93,11 +93,6 @@ export interface SlotUserSlotsInput {
     after?: string;
 }
 
-export interface SlotAttendeesInput {
-    first?: number;
-    after?: string;
-}
-
 export interface UserUserSlotsInput {
     first?: number;
     after?: string;
@@ -107,7 +102,7 @@ export interface UserUserSlotsInput {
 export interface IQuery {
     absenceTypes(input?: AbsenceTypesInput): AbsenceTypeConnection | Promise<AbsenceTypeConnection>;
     jobs(input?: JobsInput): JobConnection | Promise<JobConnection>;
-    slots(input?: SlotsInput): Slot[] | Promise<Slot[]>;
+    slots(input: SlotsInput): Slot[] | Promise<Slot[]>;
     user(userID: string): User | Promise<User>;
 }
 
@@ -204,7 +199,7 @@ export interface UpdateSlotPayload {
 }
 
 export interface UpdateUserSlotPayload {
-    attendee: Attendee;
+    userSlot: UserSlot;
 }
 
 export interface Slot {
@@ -213,27 +208,8 @@ export interface Slot {
     duration: number;
     job: Job;
     userSlots: UserSlotConnection;
-    attendees: AttendeeConnection;
     totalPlace: number;
     active: boolean;
-}
-
-export interface AttendeeConnection {
-    edges?: AttendeeEdge[];
-    pageInfo?: PageInfo;
-    totalCount: number;
-}
-
-export interface AttendeeEdge {
-    cursor: string;
-    node: Attendee;
-}
-
-export interface Attendee {
-    userSlotID: string;
-    userID: string;
-    fullName: string;
-    phoneNumber: string;
 }
 
 export interface UserSlotConnection {

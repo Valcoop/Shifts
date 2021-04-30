@@ -11,14 +11,15 @@ import {
   BookSlotInput,
   CancelBookedSlotInput,
   RemoveSlotInput,
-  SlotAttendeesInput,
   SlotsInput,
+  SlotUserSlotsInput,
   UpdateSlotInput,
   UpdateUserSlotInput,
 } from '../graphql';
-import { AttendeeConnection } from '../graphql-types';
+import { UserSlotConnection } from '../graphql-types';
 import { JobsService } from '../jobs/jobs.service';
 import { UserSlot } from '../user-slots/user-slots.entity';
+import { btoa } from '../utils';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
 
@@ -30,7 +31,7 @@ export class SlotsResolver {
   ) {}
 
   @Query()
-  async slots(@Args('input') input: SlotsInput): Promise<Slot[]> {
+  slots(@Args('input') input: SlotsInput): Promise<Slot[]> {
     return this.slotsService.find(input);
   }
 
@@ -97,37 +98,13 @@ export class SlotsResolver {
 
   @Mutation()
   async updateUserSlot(
-    @Args('input') { userSlotID, fullName, phoneNumber }: UpdateUserSlotInput,
-  ): Promise<{ attendee: UserSlot }> {
+    @Args('input') { userSlotID, fullname, phoneNumber }: UpdateUserSlotInput,
+  ): Promise<{ userSlot: UserSlot }> {
     return {
-      attendee: await this.slotsService.updateUserSlot(Number(userSlotID), {
-        ...(fullName != null ? { fullName } : {}),
+      userSlot: await this.slotsService.updateUserSlot(Number(userSlotID), {
+        ...(fullname != null ? { fullname } : {}),
         ...(phoneNumber != null ? { phoneNumber } : {}),
       }),
-    };
-  }
-
-  @ResolveField()
-  async attendees(
-    @Parent() slot: Slot,
-    @Args('input') input: SlotAttendeesInput,
-  ): Promise<AttendeeConnection> {
-    const [
-      attendees,
-      totalCount,
-    ] = await this.slotsService.getAttendeesAndCount(slot.id, input);
-
-    return {
-      totalCount,
-      edges: attendees.map((attendee) => ({
-        cursor: attendee.id.toString(),
-        node: attendee,
-      })),
-      pageInfo: {
-        // @TODO: fix me
-        hasNextPage: false,
-        endCursor: attendees[attendees.length - 1]?.id.toString(),
-      },
     };
   }
 
@@ -136,14 +113,29 @@ export class SlotsResolver {
     return this.jobService.findByID(slot.jobID);
   }
 
-  // @ResolveField()
-  // userSlots(@Parent() slot: Slot) {}
-}
-
-@Resolver('Attendee')
-export class AttendeeResolver {
   @ResolveField()
-  userSlotID(@Parent() userSlot: UserSlot) {
-    return userSlot.id;
+  async userSlots(
+    @Parent() slot: Slot,
+    @Args('input') input: SlotUserSlotsInput,
+  ): Promise<UserSlotConnection> {
+    const [totalCount, { data: userSlots, cursor }] = await Promise.all([
+      this.slotsService.countUserSlots(slot.id),
+      this.slotsService.getUserSlots(slot.id, {
+        first: input.first,
+        after: input.after,
+      }),
+    ]);
+
+    return {
+      totalCount,
+      edges: userSlots.map((userSlot) => ({
+        cursor: `id:${btoa(userSlot.id.toString())}`,
+        node: userSlot,
+      })),
+      pageInfo: {
+        hasNextPage: Boolean(cursor.afterCursor),
+        endCursor: cursor.afterCursor ?? undefined,
+      },
+    };
   }
 }

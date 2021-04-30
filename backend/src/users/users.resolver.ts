@@ -1,9 +1,9 @@
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { UserUserSlotsInput } from '../graphql';
 import { UserSlotConnection } from '../graphql-types';
+import { btoa } from '../utils';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
-import { btoa } from '../utils';
 
 @Resolver('User')
 export class UsersResolver {

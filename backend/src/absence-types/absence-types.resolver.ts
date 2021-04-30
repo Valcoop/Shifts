@@ -5,6 +5,7 @@ import {
   UpdateAbsenceTypeInput,
 } from '../graphql';
 import { AbsenceTypeConnection } from '../graphql-types';
+import { btoa } from '../utils';
 import { AbsenceType } from './absence-types.entity';
 import { AbsenceTypesService } from './absence-types.service';
 
