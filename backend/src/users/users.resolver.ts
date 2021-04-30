@@ -34,9 +34,11 @@ export class UsersResolver {
     return {
       totalCount,
       edges: userSlots.map((userSlot) => ({
-        cursor: `id:${btoa(userSlot.id.toString())},startDate:${btoa(
-          userSlot.startDate.getTime().toString(),
-        )}`,
+        cursor: btoa(
+          `id:${userSlot.id.toString()},startDate:${userSlot.startDate
+            .getTime()
+            .toString()}`,
+        ),
         node: userSlot,
       })),
       pageInfo: {

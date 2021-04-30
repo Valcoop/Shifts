@@ -24,7 +24,7 @@ export class JobsResolver {
     return {
       totalCount,
       edges: jobs.map((job) => ({
-        cursor: `id:${btoa(job.id.toString())}}`,
+        cursor: btoa(`id:${job.id.toString()}}`),
         node: job,
       })),
       pageInfo: {

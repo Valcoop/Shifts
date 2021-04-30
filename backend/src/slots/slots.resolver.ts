@@ -129,7 +129,7 @@ export class SlotsResolver {
     return {
       totalCount,
       edges: userSlots.map((userSlot) => ({
-        cursor: `id:${btoa(userSlot.id.toString())}`,
+        cursor: btoa(`id:${userSlot.id.toString()}`),
         node: userSlot,
       })),
       pageInfo: {
