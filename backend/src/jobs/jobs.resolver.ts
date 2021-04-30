@@ -15,18 +15,21 @@ export class JobsResolver {
 
   @Query()
   async jobs(@Args('input') input?: JobsInput): Promise<JobConnection> {
-    const [jobs, totalCount] = await this.jobService.find(input);
+    const [totalCount, { data: jobs, cursor }] = await Promise.all([
+      this.jobService.count(),
+      this.jobService.find(input),
+    ]);
 
     return {
       totalCount,
       edges: jobs.map((job) => ({
+        // TODO: base64 me
         cursor: job.id.toString(),
         node: job,
       })),
       pageInfo: {
-        // @TODO: fix me
-        hasNextPage: false,
-        endCursor: jobs[jobs.length - 1]?.id.toString(),
+        hasNextPage: Boolean(cursor.afterCursor),
+        endCursor: cursor.afterCursor ?? undefined,
       },
     };
   }

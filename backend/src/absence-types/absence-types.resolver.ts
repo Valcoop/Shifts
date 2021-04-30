@@ -16,20 +16,21 @@ export class AbsenceTypesResolver {
   async absenceTypes(
     @Args('input') input?: AbsenceTypesInput,
   ): Promise<AbsenceTypeConnection> {
-    const [absenceTypes, totalCount] = await this.absenceTypesService.find(
-      input,
-    );
+    const [totalCount, { data: absenceTypes, cursor }] = await Promise.all([
+      this.absenceTypesService.count(),
+      this.absenceTypesService.find(input),
+    ]);
 
     return {
       totalCount,
       edges: absenceTypes.map((absenceType) => ({
+        // TODO: base64 me
         cursor: absenceType.id.toString(),
         node: absenceType,
       })),
       pageInfo: {
-        // @TODO: fix me
-        hasNextPage: false,
-        endCursor: absenceTypes[absenceTypes.length - 1]?.id.toString(),
+        hasNextPage: Boolean(cursor.afterCursor),
+        endCursor: cursor.afterCursor ?? undefined,
       },
     };
   }

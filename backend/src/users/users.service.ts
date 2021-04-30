@@ -20,10 +20,20 @@ export class UsersService {
     return this.userRepository.findOne(userID);
   }
 
+  countUserSlots(userID: number) {
+    return this.userSlotRepository
+      .createQueryBuilder('user_slot')
+      .innerJoinAndSelect('user_slot.slot', 'slot')
+      .where('user_slot.userID = :userID', { userID })
+      .andWhere('user_slot.isDeleted = false')
+      .andWhere('slot.isDeleted = false')
+      .getCount();
+  }
+
   getUserSlots(
     userID: number,
     { startDate }: { startDate?: Date },
-    pagination: { first?: number; after?: string },
+    pagination?: { first?: number; after?: string },
   ) {
     const queryBuilder = this.userSlotRepository
       .createQueryBuilder('user_slot')
@@ -40,9 +50,9 @@ export class UsersService {
       alias: 'user_slot',
       paginationKeys: ['id', 'startDate'],
       query: {
-        limit: pagination.first,
+        limit: pagination?.first || 10,
         order: 'ASC',
-        afterCursor: pagination.after,
+        afterCursor: pagination?.after,
       },
     });
 

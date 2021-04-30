@@ -21,23 +21,25 @@ export class UsersResolver {
     @Parent() user: User,
     @Args('input') input: UserUserSlotsInput,
   ): Promise<UserSlotConnection> {
-    // @ts-ignore
-    const { data: userSlots, cursor } = await this.userService.getUserSlots(
-      user.id,
-      { startDate: input.stardDate },
-      { first: input.first, after: input.after },
-    );
+    const [totalCount, { data: userSlots, cursor }] = await Promise.all([
+      this.userService.countUserSlots(user.id),
+      this.userService.getUserSlots(
+        user.id,
+        { startDate: input.stardDate },
+        { first: input.first, after: input.after },
+      ),
+    ]);
 
     return {
-      totalCount: 0,
+      totalCount,
       edges: userSlots.map((userSlot) => ({
+        // TODO: base64 me
         cursor: userSlot.id.toString(),
         node: userSlot,
       })),
       pageInfo: {
-        // @TODO: fix me
-        hasNextPage: false,
-        endCursor: userSlots[userSlots.length - 1]?.id.toString(),
+        hasNextPage: Boolean(cursor.afterCursor),
+        endCursor: cursor.afterCursor ?? undefined,
       },
     };
   }
