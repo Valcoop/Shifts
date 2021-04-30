@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Slot } from '../slots/slots.entity';
 
 @Entity('user_slots')
 export class UserSlot {
@@ -14,7 +17,10 @@ export class UserSlot {
   @Column()
   userID: number;
 
-  @Column()
+  @ManyToOne(() => Slot, (slot) => slot.userSlots)
+  @JoinColumn({ name: 'slotID' })
+  slot: Slot;
+  // TODO: needed ???
   slotID: number;
 
   @Column()

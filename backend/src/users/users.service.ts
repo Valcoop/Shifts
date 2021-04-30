@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, LessThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Slot } from '../slots/slots.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from './users.entity';
@@ -8,6 +8,7 @@ import { User } from './users.entity';
 @Injectable()
 export class UsersService {
   constructor(
+    // @ts-ignore
     @InjectRepository(Slot) private slotRepository: Repository<Slot>,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserSlot)
@@ -18,27 +19,18 @@ export class UsersService {
     return this.userRepository.findOne(userID);
   }
 
-  async getUserSlots(
-    userID: number,
-    pagination: { first?: number; after?: string },
-  ): Promise<[Slot[], number]> {
-    const [usersSlots, totalCount] = await Promise.all([
-      this.userSlotRepository.find({
-        where: {
-          userID,
-          isDeleted: false,
-          ...(pagination.after && { id: LessThan(pagination.after) }),
-        },
-        take: pagination.first || 10,
-      }),
-      this.userSlotRepository.count({ where: { userID, isDeleted: false } }),
-    ]);
+  getUserSlots(userID: number, { startDate }: { startDate?: Date }) {
+    const queryBuilder = this.userSlotRepository
+      .createQueryBuilder('user_slot')
+      .innerJoinAndSelect('user_slot.slot', 'slot')
+      .where('user_slot.userID = :userID', { userID })
+      .andWhere('user_slot.isDeleted = false');
+    // TODO : handle isDelete slot
+    // .andWhere('slot.isDelete = false')
 
-    return [
-      await this.slotRepository.find({
-        where: { id: In(usersSlots.map((userSlot) => userSlot.slotID)) },
-      }),
-      totalCount,
-    ];
+    if (startDate)
+      queryBuilder.andWhere('slot.startDate >= :startDate', { startDate });
+
+    return queryBuilder.getMany();
   }
 }

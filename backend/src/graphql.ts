@@ -101,11 +101,7 @@ export interface SlotAttendeesInput {
 export interface UserUserSlotsInput {
     first?: number;
     after?: string;
-}
-
-export interface UserSlotsInput {
-    first?: number;
-    after?: string;
+    stardDate?: Date;
 }
 
 export interface IQuery {
@@ -211,17 +207,6 @@ export interface UpdateUserSlotPayload {
     attendee: Attendee;
 }
 
-export interface SlotConnection {
-    edges?: SlotEdge[];
-    pageInfo?: PageInfo;
-    totalCount: number;
-}
-
-export interface SlotEdge {
-    cursor: string;
-    node: Slot;
-}
-
 export interface Slot {
     id: string;
     startDate: Date;
@@ -288,5 +273,4 @@ export interface User {
     lastname: string;
     phoneNumber: string;
     userSlots: UserSlotConnection;
-    slots: SlotConnection;
 }

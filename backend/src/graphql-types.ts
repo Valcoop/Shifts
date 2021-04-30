@@ -1,13 +1,12 @@
 import { AbsenceType } from './absence-types/absence-types.entity';
 import {
   AbsenceTypeConnection as GraphQLAbsenceTypeConnection,
-  JobConnection as GraphQLJobConnection,
-  SlotConnection as GraphQLSlotConnection,
-  UserConnection as GraphQLUserConnection,
   AttendeeConnection as GraphQLAttendeeConnection,
+  JobConnection as GraphQLJobConnection,
+  UserConnection as GraphQLUserConnection,
+  UserSlotConnection as GraphQLUserSlotConnection,
 } from './graphql';
 import { Job } from './jobs/jobs.entity';
-import { Slot } from './slots/slots.entity';
 import { UserSlot } from './user-slots/user-slots.entity';
 import { User } from './users/users.entity';
 
@@ -39,13 +38,14 @@ export interface JobConnection extends Omit<GraphQLJobConnection, 'edges'> {
   edges?: JobEdge[];
 }
 
-export interface SlotEdge {
+export interface UserSlotEdge {
   cursor: string;
-  node: Slot;
+  node: UserSlot;
 }
 
-export interface SlotConnection extends Omit<GraphQLSlotConnection, 'edges'> {
-  edges?: SlotEdge[];
+export interface UserSlotConnection
+  extends Omit<GraphQLUserSlotConnection, 'edges'> {
+  edges?: UserSlotEdge[];
 }
 
 export interface AttendeeEdge {

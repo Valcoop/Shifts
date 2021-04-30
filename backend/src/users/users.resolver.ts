@@ -1,6 +1,6 @@
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { UserSlotsInput } from '../graphql';
-import { SlotConnection } from '../graphql-types';
+import { UserUserSlotsInput } from '../graphql';
+import { UserSlotConnection } from '../graphql-types';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
 
@@ -17,25 +17,23 @@ export class UsersResolver {
   }
 
   @ResolveField()
-  async slots(
+  async userSlots(
     @Parent() user: User,
-    @Args('input') input: UserSlotsInput,
-  ): Promise<SlotConnection> {
-    const [slots, totalCount] = await this.userService.getUserSlots(
-      user.id,
-      input,
-    );
-
+    @Args('input') input: UserUserSlotsInput,
+  ): Promise<UserSlotConnection> {
+    const userSlots = await this.userService.getUserSlots(user.id, {
+      startDate: input.stardDate,
+    });
     return {
-      totalCount,
-      edges: slots.map((slot) => ({
-        cursor: slot.id.toString(),
-        node: slot,
+      totalCount: 0,
+      edges: userSlots.map((userSlot) => ({
+        cursor: userSlot.id.toString(),
+        node: userSlot,
       })),
       pageInfo: {
         // @TODO: fix me
         hasNextPage: false,
-        endCursor: slots[slots.length - 1]?.id.toString(),
+        endCursor: userSlots[userSlots.length - 1]?.id.toString(),
       },
     };
   }

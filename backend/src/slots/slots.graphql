@@ -82,18 +82,6 @@ type UpdateUserSlotPayload {
   attendee: Attendee!
 }
 
-# TODO: Remove me
-type SlotConnection {
-  edges: [SlotEdge!]
-  pageInfo: PageInfo
-  totalCount: Int!
-}
-
-type SlotEdge {
-  cursor: ID!
-  node: Slot!
-}
-
 type Slot {
   id: ID!
   startDate: Date!

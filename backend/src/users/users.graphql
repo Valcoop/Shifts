@@ -19,17 +19,10 @@ type User {
   lastname: String!
   phoneNumber: String!
   userSlots(input: UserUserSlotsInput!): UserSlotConnection!
-  # TODO: Remove me
-  slots(input: UserSlotsInput!): SlotConnection!
 }
 
 input UserUserSlotsInput {
   first: Int
   after: ID
-}
-
-# TODO: Remove me
-input UserSlotsInput {
-  first: Int
-  after: ID
+  stardDate: Date
 }
