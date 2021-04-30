@@ -59,6 +59,7 @@ export class SlotsResolver {
         duration: input.duration,
         jobID: Number(input.jobID),
         totalPlace: input.totalPlace,
+        isDeleted: false,
       }),
     };
   }
@@ -67,7 +68,11 @@ export class SlotsResolver {
   async removeSlot(
     @Args('input') input: RemoveSlotInput,
   ): Promise<{ slot: Slot }> {
-    return { slot: await this.slotsService.remove(Number(input.slotID)) };
+    const slot = await this.slotsService.findOne(Number(input.slotID));
+    // TODO: FIX ME
+    if (!slot) throw new Error();
+
+    return { slot: await this.slotsService.delete(slot) };
   }
 
   @Mutation()

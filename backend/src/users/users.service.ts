@@ -24,9 +24,8 @@ export class UsersService {
       .createQueryBuilder('user_slot')
       .innerJoinAndSelect('user_slot.slot', 'slot')
       .where('user_slot.userID = :userID', { userID })
-      .andWhere('user_slot.isDeleted = false');
-    // TODO : handle isDelete slot
-    // .andWhere('slot.isDelete = false')
+      .andWhere('user_slot.isDeleted = false')
+      .andWhere('slot.isDeleted = false');
 
     if (startDate)
       queryBuilder.andWhere('slot.startDate >= :startDate', { startDate });

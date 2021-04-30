@@ -14,6 +14,7 @@ interface SlotDAO {
   duration: number;
   jobID: number;
   totalPlace: number;
+  isDeleted: boolean;
 }
 
 interface UserSlotDAO {
@@ -36,6 +37,7 @@ export class SlotsService {
       where: {
         ...(active != null ? { active } : {}),
         startDate: Between(startDate, endDate),
+        isDeleted: false,
       },
       order: { startDate: 1 },
     });
@@ -58,7 +60,9 @@ export class SlotsService {
   }
 
   async book({ userID, slotID, fullName, phoneNumber }: BookSlotInput) {
-    const slot = await this.slotRepository.findOne(slotID);
+    const slot = await this.slotRepository.findOne({
+      where: { id: slotID, isDeleted: false },
+    });
     // TODO: FIX ME
     if (!slot) throw new Error();
 
@@ -109,18 +113,14 @@ export class SlotsService {
     return this.slotRepository.save(slotEntity);
   }
 
-  async remove(slotID: number) {
-    const slot = await this.slotRepository.findOne(slotID);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-    await this.slotRepository.remove(slot);
-
-    return slot;
+  delete(slot: Slot) {
+    return this.slotRepository.save({ ...slot, isDeleted: true });
   }
 
   update(slotID: number, slotDAO: Partial<SlotDAO>) {
-    const slotEntity = this.slotRepository.create({ id: slotID, ...slotDAO });
-    return this.slotRepository.save(slotEntity);
+    return this.slotRepository.save(
+      this.slotRepository.create({ id: slotID, ...slotDAO }),
+    );
   }
 
   async getAttendeesAndCount(

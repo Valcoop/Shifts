@@ -34,9 +34,8 @@ export class Slot {
   @Column()
   totalPlace: number;
 
-  // TODO : handle isDelete slot
-  // @Column()
-  // isDeleted: boolean;
+  @Column()
+  isDeleted: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
