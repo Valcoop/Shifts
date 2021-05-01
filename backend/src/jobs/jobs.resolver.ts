@@ -24,7 +24,7 @@ export class JobsResolver {
     return {
       totalCount,
       edges: jobs.map((job) => ({
-        cursor: btoa(`id:${job.id.toString()}}`),
+        cursor: btoa(`id:${job.id.toString()}`),
         node: job,
       })),
       pageInfo: {
@@ -39,7 +39,7 @@ export class JobsResolver {
     @Args('input') { color, name }: AddJobInput,
   ): Promise<{ job: Job }> {
     return {
-      job: await this.jobsService.save({ color, name, isDelete: false }),
+      job: await this.jobsService.save({ color, name, isDeleted: false }),
     };
   }
 

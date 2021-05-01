@@ -63,6 +63,10 @@ export class SlotsResolver {
     @Args('input')
     { active, duration, jobID, startDate, totalPlace }: AddSlotInput,
   ): Promise<{ slot: Slot }> {
+    const job = await this.jobService.findByID(Number(jobID));
+    // TODO: FIX ME
+    if (!job) throw new Error();
+
     return {
       slot: await this.slotsService.save({
         active,
@@ -72,7 +76,7 @@ export class SlotsResolver {
         lastUserAdminUpdated: 1,
         startDate,
         duration,
-        jobID: Number(jobID),
+        job,
         totalPlace,
         isDeleted: false,
       }),
@@ -108,11 +112,6 @@ export class SlotsResolver {
         ...(totalPlace != null ? { totalPlace } : {}),
       }),
     };
-  }
-
-  @ResolveField()
-  job(@Parent() slot: Slot) {
-    return this.jobService.findByID(slot.jobID);
   }
 
   @ResolveField()

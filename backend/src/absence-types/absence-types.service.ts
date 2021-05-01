@@ -16,7 +16,7 @@ export class AbsenceTypesService {
   ) {}
 
   count(): Promise<number> {
-    return this.absenceTypeRepository.count({});
+    return this.absenceTypeRepository.count();
   }
 
   find(pagination?: { first?: number; after?: string }) {

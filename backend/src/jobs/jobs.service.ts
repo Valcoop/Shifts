@@ -7,7 +7,7 @@ import { Job } from './jobs.entity';
 interface JobDAO {
   name: string;
   color: string;
-  isDelete: boolean;
+  isDeleted: boolean;
 }
 
 @Injectable()
@@ -15,7 +15,7 @@ export class JobsService {
   constructor(@InjectRepository(Job) private jobRepository: Repository<Job>) {}
 
   count(): Promise<number> {
-    return this.jobRepository.count();
+    return this.jobRepository.count({ isDeleted: false });
   }
 
   delete(job: Job) {
@@ -49,9 +49,9 @@ export class JobsService {
     return this.jobRepository.save(this.jobRepository.create(jobDAO));
   }
 
-  update(jobID: number, jobDAO: Partial<JobDAO>): Promise<Job> {
+  update(id: number, jobDAO: Partial<JobDAO>): Promise<Job> {
     return this.jobRepository.save(
-      this.jobRepository.create({ id: jobID, ...jobDAO }),
+      this.jobRepository.create({ id, ...jobDAO }),
     );
   }
 }

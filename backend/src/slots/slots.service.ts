@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { buildPaginator } from 'typeorm-cursor-pagination';
 import { SlotsInput } from '../graphql';
+import { Job } from '../jobs/jobs.entity';
 import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from '../users/users.entity';
@@ -14,7 +15,7 @@ interface SlotDAO {
   lastUserAdminUpdated: number;
   startDate: Date;
   duration: number;
-  jobID: number;
+  job: Job;
   totalPlace: number;
   isDeleted: boolean;
 }
@@ -43,6 +44,7 @@ export class SlotsService {
           startDate: Between(startDate, endDate),
           isDeleted: false,
         },
+        relations: ['job'],
       });
     }
 

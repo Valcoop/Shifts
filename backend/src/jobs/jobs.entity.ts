@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Slot } from '../slots/slots.entity';
 
 @Entity('jobs')
 export class Job {
@@ -25,4 +27,7 @@ export class Job {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Slot, (slot) => slot.job)
+  slots: Slot[];
 }

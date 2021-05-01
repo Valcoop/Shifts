@@ -25,7 +25,7 @@ export class AbsenceTypesResolver {
     return {
       totalCount,
       edges: absenceTypes.map((absenceType) => ({
-        cursor: btoa(`id:${absenceType.id.toString()}}`),
+        cursor: btoa(`id:${absenceType.id.toString()}`),
         node: absenceType,
       })),
       pageInfo: {
