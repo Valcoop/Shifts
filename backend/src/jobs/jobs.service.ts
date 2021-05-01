@@ -14,7 +14,18 @@ export class JobsService {
   constructor(@InjectRepository(Job) private jobRepository: Repository<Job>) {}
 
   count(): Promise<number> {
-    return this.jobRepository.count({});
+    return this.jobRepository.count();
+  }
+
+  async delete(jobID: number): Promise<Job> {
+    const job = await this.jobRepository.findOne(jobID);
+    // TODO: FIX ME
+    if (!job) throw new Error();
+
+    // TODO: use isDeleted
+    await this.jobRepository.remove(job);
+
+    return job;
   }
 
   find(pagination?: { first?: number; after?: string }) {
@@ -34,25 +45,15 @@ export class JobsService {
     return nextPaginator.paginate(queryBuilder);
   }
 
-  findByID(id: number) {
+  findByID(id: number): Promise<Job | undefined> {
     return this.jobRepository.findOne(id);
   }
 
-  save(jobDAO: JobDAO) {
+  save(jobDAO: JobDAO): Promise<Job> {
     return this.jobRepository.save(this.jobRepository.create(jobDAO));
   }
 
-  async delete(jobID: string) {
-    const job = await this.jobRepository.findOne(jobID);
-    // TODO: FIX ME
-    if (!job) throw new Error();
-
-    this.jobRepository.remove(job);
-
-    return job;
-  }
-
-  update(jobID: number, jobDAO: Partial<JobDAO>) {
+  update(jobID: number, jobDAO: Partial<JobDAO>): Promise<Job> {
     return this.jobRepository.save(
       this.jobRepository.create({ id: jobID, ...jobDAO }),
     );

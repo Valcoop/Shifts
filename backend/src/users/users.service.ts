@@ -13,8 +13,8 @@ export class UsersService {
     private userSlotRepository: Repository<UserSlot>,
   ) {}
 
-  findOne(userID: number) {
-    return this.userRepository.findOne(userID);
+  findByID(id: number): Promise<User | undefined> {
+    return this.userRepository.findOne(id);
   }
 
   countUserSlots(userID: number) {

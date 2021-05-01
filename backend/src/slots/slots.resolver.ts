@@ -85,7 +85,7 @@ export class SlotsResolver {
   async removeSlot(
     @Args('input') { slotID }: RemoveSlotInput,
   ): Promise<{ slot: Slot }> {
-    const slot = await this.slotsService.findOne(Number(slotID));
+    const slot = await this.slotsService.findByID(Number(slotID));
     // TODO: FIX ME
     if (!slot) throw new Error();
 

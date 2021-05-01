@@ -38,13 +38,16 @@ export class AbsenceTypesService {
     return nextPaginator.paginate(queryBuilder);
   }
 
-  save(reason: string) {
+  save(reason: string): Promise<AbsenceType> {
     return this.absenceTypeRepository.save(
       this.absenceTypeRepository.create({ reason }),
     );
   }
 
-  update(absenceTypeID: number, absenceTypeDAO: Partial<AbsenceTypeDAO>) {
+  update(
+    absenceTypeID: number,
+    absenceTypeDAO: Partial<AbsenceTypeDAO>,
+  ): Promise<AbsenceType> {
     return this.absenceTypeRepository.save(
       this.absenceTypeRepository.create({
         id: absenceTypeID,

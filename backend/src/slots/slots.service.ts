@@ -70,7 +70,7 @@ export class SlotsService {
       : slots.filter((slot) => slot.userSlots.length < slot.totalPlace);
   }
 
-  findOne(id: number): Promise<Slot | undefined> {
+  findByID(id: number): Promise<Slot | undefined> {
     return this.slotRepository.findOne(id);
   }
 

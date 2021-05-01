@@ -41,7 +41,7 @@ export class JobsResolver {
 
   @Mutation()
   async removeJob(@Args('input') input: RemoveJobInput): Promise<{ job: Job }> {
-    return { job: await this.jobService.delete(input.jobID) };
+    return { job: await this.jobService.delete(Number(input.jobID)) };
   }
 
   @Mutation()

@@ -4,7 +4,6 @@ import { JobsModule } from '../jobs/jobs.module';
 import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from '../users/users.entity';
-import { UsersModule } from '../users/users.module';
 import { Slot } from './slots.entity';
 import { SlotsResolver } from './slots.resolver';
 import { SlotsService } from './slots.service';
@@ -13,9 +12,7 @@ import { SlotsService } from './slots.service';
   imports: [
     TypeOrmModule.forFeature([Slot, User, UserSlot, UserSlotAbsence]),
     JobsModule,
-    UsersModule,
   ],
-  exports: [SlotsService],
   providers: [SlotsResolver, SlotsService],
 })
 export class SlotsModule {}
