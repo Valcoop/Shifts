@@ -7,6 +7,7 @@ import { Job } from './jobs.entity';
 interface JobDAO {
   name: string;
   color: string;
+  isDelete: boolean;
 }
 
 @Injectable()
@@ -17,19 +18,14 @@ export class JobsService {
     return this.jobRepository.count();
   }
 
-  async delete(jobID: number): Promise<Job> {
-    const job = await this.jobRepository.findOne(jobID);
-    // TODO: FIX ME
-    if (!job) throw new Error();
-
-    // TODO: use isDeleted
-    await this.jobRepository.remove(job);
-
-    return job;
+  delete(job: Job) {
+    return this.jobRepository.save({ ...job, isDeleted: true });
   }
 
   find(pagination?: { first?: number; after?: string }) {
-    const queryBuilder = this.jobRepository.createQueryBuilder('job');
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('job')
+      .where('job.isDeleted = false');
 
     const nextPaginator = buildPaginator({
       entity: Job,

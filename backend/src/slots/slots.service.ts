@@ -76,7 +76,7 @@ export class SlotsService {
   ): Promise<Slot> {
     const [slot, user] = await Promise.all([
       this.slotRepository.findOne({ where: { id: slotID, isDeleted: false } }),
-      this.userRepository.findOne({ where: { id: userID } }),
+      this.userRepository.findOne(userID),
     ]);
     // TODO: FIX ME
     if (!slot) throw new Error();

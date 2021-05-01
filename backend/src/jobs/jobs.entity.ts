@@ -17,6 +17,9 @@ export class Job {
   @Column()
   color: string;
 
+  @Column()
+  isDeleted: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

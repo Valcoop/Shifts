@@ -12,13 +12,13 @@ import { JobsService } from './jobs.service';
 
 @Resolver()
 export class JobsResolver {
-  constructor(private jobService: JobsService) {}
+  constructor(private jobsService: JobsService) {}
 
   @Query()
   async jobs(@Args('input') input?: JobsInput): Promise<JobConnection> {
     const [totalCount, { data: jobs, cursor }] = await Promise.all([
-      this.jobService.count(),
-      this.jobService.find(input),
+      this.jobsService.count(),
+      this.jobsService.find(input),
     ]);
 
     return {
@@ -35,13 +35,23 @@ export class JobsResolver {
   }
 
   @Mutation()
-  async addJob(@Args('input') input: AddJobInput): Promise<{ job: Job }> {
-    return { job: await this.jobService.save(input) };
+  async addJob(
+    @Args('input') { color, name }: AddJobInput,
+  ): Promise<{ job: Job }> {
+    return {
+      job: await this.jobsService.save({ color, name, isDelete: false }),
+    };
   }
 
   @Mutation()
-  async removeJob(@Args('input') input: RemoveJobInput): Promise<{ job: Job }> {
-    return { job: await this.jobService.delete(Number(input.jobID)) };
+  async removeJob(
+    @Args('input') { jobID }: RemoveJobInput,
+  ): Promise<{ job: Job }> {
+    const job = await this.jobsService.findByID(Number(jobID));
+    // TODO: FIX ME
+    if (!job) throw new Error();
+
+    return { job: await this.jobsService.delete(job) };
   }
 
   @Mutation()
@@ -49,7 +59,7 @@ export class JobsResolver {
     @Args('input') { jobID, color, name }: UpdateJobInput,
   ): Promise<{ job: Job }> {
     return {
-      job: await this.jobService.update(Number(jobID), {
+      job: await this.jobsService.update(Number(jobID), {
         ...(color != null ? { color } : {}),
         ...(name != null ? { name } : {}),
       }),
