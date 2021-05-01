@@ -68,6 +68,7 @@ export class SlotsService {
     return this.slotRepository.findOne(id);
   }
 
+  // TODO: question : should it be moved to userslot ?
   async book(
     userID: number,
     slotID: number,
@@ -97,6 +98,7 @@ export class SlotsService {
     return slot;
   }
 
+  // TODO: question : should it be moved to userslot ?
   async cancelBooked(
     userSlotID: number,
     {

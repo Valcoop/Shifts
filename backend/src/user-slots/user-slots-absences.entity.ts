@@ -11,9 +11,11 @@ export class UserSlotAbsence {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // TODO: should we use relation
   @Column()
   userID: number;
 
+  // TODO: should we use relation
   @Column()
   absenceTypeID: number;
 

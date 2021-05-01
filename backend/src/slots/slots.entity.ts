@@ -28,6 +28,7 @@ export class Slot {
   @Column()
   duration: number;
 
+  // TODO: should we use relation
   @Column()
   jobID: number;
 

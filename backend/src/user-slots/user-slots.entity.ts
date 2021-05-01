@@ -29,6 +29,7 @@ export class UserSlot {
   @Column()
   done: boolean;
 
+  // TODO: should we use relation
   @Column()
   userSlotAbsenceID?: number;
 
