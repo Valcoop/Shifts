@@ -35,7 +35,7 @@ export class JobsService {
   }
 
   findByID(id: number) {
-    return this.jobRepository.findOne({ where: { id } });
+    return this.jobRepository.findOne(id);
   }
 
   save(jobDAO: JobDAO) {

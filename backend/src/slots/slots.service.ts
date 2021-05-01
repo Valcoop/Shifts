@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { buildPaginator } from 'typeorm-cursor-pagination';
-import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
+import { SlotsInput } from '../graphql';
 import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from '../users/users.entity';
@@ -36,34 +36,49 @@ export class SlotsService {
     private userSlotAbsenceRepository: Repository<UserSlotAbsence>,
   ) {}
 
-  async find({ active, endDate, startDate, isFull }: SlotsInput) {
-    const slots = await this.slotRepository.find({
-      where: {
-        ...(active != null ? { active } : {}),
-        startDate: Between(startDate, endDate),
-        isDeleted: false,
-      },
-      order: { startDate: 1 },
-    });
+  async find({
+    active,
+    endDate,
+    startDate,
+    isFull,
+  }: SlotsInput): Promise<Slot[]> {
+    if (isFull == undefined) {
+      return this.slotRepository.find({
+        where: {
+          ...(active != null ? { active } : {}),
+          startDate: Between(startDate, endDate),
+          isDeleted: false,
+        },
+      });
+    }
 
-    if (isFull == undefined) return slots;
+    const queryBuilder = await this.slotRepository
+      .createQueryBuilder('slot')
+      .leftJoinAndSelect('slot.userSlots', 'userSlot', 'slot.isDeleted = false')
+      .where('slot.startDate BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      })
+      .where('userSlot.isDeleted = FALSE')
+      .where('userSlot.userSlotAbsenceID IS NULL');
 
-    const userSlotsCount = await Promise.all(
-      slots.map((slot) =>
-        this.userSlotRepository.count({ isDeleted: false, slot }),
-      ),
-    );
+    if (active != null) queryBuilder.where('active = :active', { active });
+    const slots = await queryBuilder.getMany();
 
     return isFull
-      ? slots.filter((slot, i) => userSlotsCount[i] >= slot.totalPlace)
-      : slots.filter((slot, i) => userSlotsCount[i] < slot.totalPlace);
+      ? slots.filter((slot) => slot.userSlots.length >= slot.totalPlace)
+      : slots.filter((slot) => slot.userSlots.length < slot.totalPlace);
   }
 
-  findOne(slotID: number) {
-    return this.slotRepository.findOne(slotID);
+  findOne(id: number): Promise<Slot | undefined> {
+    return this.slotRepository.findOne(id);
   }
 
-  async book({ userID, slotID, fullName, phoneNumber }: BookSlotInput) {
+  async book(
+    userID: number,
+    slotID: number,
+    { fullName, phoneNumber }: { fullName: string; phoneNumber: string },
+  ): Promise<Slot> {
     const [slot, user] = await Promise.all([
       this.slotRepository.findOne({ where: { id: slotID, isDeleted: false } }),
       this.userRepository.findOne({ where: { id: userID } }),
@@ -88,11 +103,13 @@ export class SlotsService {
     return slot;
   }
 
-  async cancelBooked({
-    userSlotID,
-    absenceTypeID,
-    description,
-  }: CancelBookedSlotInput) {
+  async cancelBooked(
+    userSlotID: number,
+    {
+      absenceTypeID,
+      description,
+    }: { absenceTypeID: number; description?: string },
+  ): Promise<Slot> {
     const userSlot = await this.userSlotRepository.findOne(userSlotID, {
       relations: ['slot', 'user'],
     });
@@ -102,7 +119,7 @@ export class SlotsService {
     const userSlotAbsence = await this.userSlotAbsenceRepository.save(
       this.userSlotAbsenceRepository.create({
         userID: userSlot.user.id,
-        absenceTypeID: Number(absenceTypeID),
+        absenceTypeID,
         description,
       }),
     );
@@ -117,20 +134,20 @@ export class SlotsService {
   }
 
   save(slotDAO: SlotDAO) {
-    const slotEntity = this.slotRepository.create(slotDAO);
-    return this.slotRepository.save(slotEntity);
+    return this.slotRepository.save(this.slotRepository.create(slotDAO));
   }
 
   delete(slot: Slot) {
     return this.slotRepository.save({ ...slot, isDeleted: true });
   }
 
-  update(slotID: number, slotDAO: Partial<SlotDAO>) {
+  update(id: number, slotDAO: Partial<SlotDAO>) {
     return this.slotRepository.save(
-      this.slotRepository.create({ id: slotID, ...slotDAO }),
+      this.slotRepository.create({ id, ...slotDAO }),
     );
   }
 
+  // UserSlot
   countUserSlots(slotID: number) {
     return this.userSlotRepository
       .createQueryBuilder('user_slot')
@@ -168,7 +185,7 @@ export class SlotsService {
     return nextPaginator.paginate(queryBuilder);
   }
 
-  // UserSlot
+  // TODO: maybe move it to userSlotService
   updateUserSlot(id: number, userSlotDAO: Partial<UserSlotDAO>) {
     return this.userSlotRepository.save(
       this.userSlotRepository.create({

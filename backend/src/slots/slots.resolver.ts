@@ -36,30 +36,46 @@ export class SlotsResolver {
   }
 
   @Mutation()
-  async bookSlot(@Args('input') input: BookSlotInput): Promise<{ slot: Slot }> {
-    return { slot: await this.slotsService.book(input) };
+  async bookSlot(
+    @Args('input') { userID, slotID, fullName, phoneNumber }: BookSlotInput,
+  ): Promise<{ slot: Slot }> {
+    return {
+      slot: await this.slotsService.book(Number(userID), Number(slotID), {
+        fullName: fullName,
+        phoneNumber: phoneNumber,
+      }),
+    };
   }
 
   @Mutation()
   async cancelBookedSlot(
-    @Args('input') input: CancelBookedSlotInput,
+    @Args('input')
+    { userSlotID, absenceTypeID, description }: CancelBookedSlotInput,
   ): Promise<{ slot: Slot }> {
-    return { slot: await this.slotsService.cancelBooked(input) };
+    return {
+      slot: await this.slotsService.cancelBooked(Number(userSlotID), {
+        absenceTypeID: Number(absenceTypeID),
+        description,
+      }),
+    };
   }
 
   @Mutation()
-  async addSlot(@Args('input') input: AddSlotInput): Promise<{ slot: Slot }> {
+  async addSlot(
+    @Args('input')
+    { active, duration, jobID, startDate, totalPlace }: AddSlotInput,
+  ): Promise<{ slot: Slot }> {
     return {
       slot: await this.slotsService.save({
-        active: input.active,
+        active,
         // TODO: Change me
         userAdminCreated: 1,
         // TODO: Change me
         lastUserAdminUpdated: 1,
-        startDate: input.startDate,
-        duration: input.duration,
-        jobID: Number(input.jobID),
-        totalPlace: input.totalPlace,
+        startDate,
+        duration,
+        jobID: Number(jobID),
+        totalPlace,
         isDeleted: false,
       }),
     };
@@ -67,9 +83,9 @@ export class SlotsResolver {
 
   @Mutation()
   async removeSlot(
-    @Args('input') input: RemoveSlotInput,
+    @Args('input') { slotID }: RemoveSlotInput,
   ): Promise<{ slot: Slot }> {
-    const slot = await this.slotsService.findOne(Number(input.slotID));
+    const slot = await this.slotsService.findOne(Number(slotID));
     // TODO: FIX ME
     if (!slot) throw new Error();
 
@@ -116,14 +132,11 @@ export class SlotsResolver {
   @ResolveField()
   async userSlots(
     @Parent() slot: Slot,
-    @Args('input') input: SlotUserSlotsInput,
+    @Args('input') { first, after }: SlotUserSlotsInput,
   ): Promise<UserSlotConnection> {
     const [totalCount, { data: userSlots, cursor }] = await Promise.all([
       this.slotsService.countUserSlots(slot.id),
-      this.slotsService.getUserSlots(slot.id, {
-        first: input.first,
-        after: input.after,
-      }),
+      this.slotsService.getUserSlots(slot.id, { first, after }),
     ]);
 
     return {
