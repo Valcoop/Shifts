@@ -19,12 +19,6 @@ interface SlotDAO {
   isDeleted: boolean;
 }
 
-interface UserSlotDAO {
-  fullName: string;
-  phoneNumber: string;
-  startDate: Date;
-}
-
 @Injectable()
 export class SlotsService {
   constructor(
@@ -183,15 +177,5 @@ export class SlotsService {
     });
 
     return nextPaginator.paginate(queryBuilder);
-  }
-
-  // TODO: maybe move it to userSlotService
-  updateUserSlot(id: number, userSlotDAO: Partial<UserSlotDAO>) {
-    return this.userSlotRepository.save(
-      this.userSlotRepository.create({
-        id,
-        ...userSlotDAO,
-      }),
-    );
   }
 }

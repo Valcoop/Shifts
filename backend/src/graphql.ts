@@ -82,15 +82,15 @@ export interface UpdateSlotInput {
     active?: boolean;
 }
 
+export interface SlotUserSlotsInput {
+    first?: number;
+    after?: string;
+}
+
 export interface UpdateUserSlotInput {
     userSlotID: string;
     fullName?: string;
     phoneNumber?: string;
-}
-
-export interface SlotUserSlotsInput {
-    first?: number;
-    after?: string;
 }
 
 export interface UserUserSlotsInput {
@@ -198,10 +198,6 @@ export interface UpdateSlotPayload {
     slot: Slot;
 }
 
-export interface UpdateUserSlotPayload {
-    userSlot: UserSlot;
-}
-
 export interface Slot {
     id: string;
     startDate: Date;
@@ -210,6 +206,10 @@ export interface Slot {
     userSlots: UserSlotConnection;
     totalPlace: number;
     active: boolean;
+}
+
+export interface UpdateUserSlotPayload {
+    userSlot: UserSlot;
 }
 
 export interface UserSlotConnection {

@@ -14,11 +14,9 @@ import {
   SlotsInput,
   SlotUserSlotsInput,
   UpdateSlotInput,
-  UpdateUserSlotInput,
 } from '../graphql';
 import { UserSlotConnection } from '../graphql-types';
 import { JobsService } from '../jobs/jobs.service';
-import { UserSlot } from '../user-slots/user-slots.entity';
 import { btoa } from '../utils';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
@@ -108,18 +106,6 @@ export class SlotsResolver {
         ...(duration != null ? { duration } : {}),
         ...(jobID != null ? { jobID: Number(jobID) } : {}),
         ...(totalPlace != null ? { totalPlace } : {}),
-      }),
-    };
-  }
-
-  @Mutation()
-  async updateUserSlot(
-    @Args('input') { userSlotID, fullname, phoneNumber }: UpdateUserSlotInput,
-  ): Promise<{ userSlot: UserSlot }> {
-    return {
-      userSlot: await this.slotsService.updateUserSlot(Number(userSlotID), {
-        ...(fullname != null ? { fullname } : {}),
-        ...(phoneNumber != null ? { phoneNumber } : {}),
       }),
     };
   }

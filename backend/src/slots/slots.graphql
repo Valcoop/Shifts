@@ -15,7 +15,6 @@ type Mutation {
   addSlot(input: AddSlotInput!): AddSlotPayload!
   removeSlot(input: RemoveSlotInput!): RemoveSlotPayload!
   updateSlot(input: UpdateSlotInput!): UpdateSlotPayload!
-  updateUserSlot(input: UpdateUserSlotInput!): UpdateUserSlotPayload!
 }
 
 input BookSlotInput {
@@ -70,16 +69,6 @@ input UpdateSlotInput {
 
 type UpdateSlotPayload {
   slot: Slot!
-}
-
-input UpdateUserSlotInput {
-  userSlotID: ID!
-  fullName: String
-  phoneNumber: String
-}
-
-type UpdateUserSlotPayload {
-  userSlot: UserSlot!
 }
 
 type Slot {
