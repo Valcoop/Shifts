@@ -99,10 +99,12 @@ export class SlotsResolver {
     @Args('input')
     { slotID, active, duration, jobID, startDate, totalPlace }: UpdateSlotInput,
   ): Promise<{ slot: Slot }> {
+    const slot = await this.slotsService.findByID(Number(slotID));
+    // TODO: FIX ME
+    if (!slot) throw new Error();
+
     return {
-      slot: await this.slotsService.update(Number(slotID), {
-        // TODO: Change me
-        userAdminCreated: 1,
+      slot: await this.slotsService.update(slot, {
         // TODO: Change me
         lastUserAdminUpdated: 1,
         ...(active != null ? { active } : {}),

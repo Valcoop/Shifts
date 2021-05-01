@@ -131,22 +131,22 @@ export class SlotsService {
     return userSlot.slot;
   }
 
-  save(slotDAO: SlotDAO) {
+  save(slotDAO: SlotDAO): Promise<Slot> {
     return this.slotRepository.save(this.slotRepository.create(slotDAO));
   }
 
-  delete(slot: Slot) {
+  delete(slot: Slot): Promise<Slot> {
     return this.slotRepository.save({ ...slot, isDeleted: true });
   }
 
-  update(id: number, slotDAO: Partial<SlotDAO>) {
+  update(slot: Slot, slotDAO: Partial<SlotDAO>): Promise<Slot> {
     return this.slotRepository.save(
-      this.slotRepository.create({ id, ...slotDAO }),
+      this.slotRepository.create({ ...slot, ...slotDAO }),
     );
   }
 
   // UserSlot
-  countUserSlots(slotID: number) {
+  countUserSlots(slotID: number): Promise<number> {
     return this.userSlotRepository
       .createQueryBuilder('user_slot')
       .innerJoinAndSelect('user_slot.slot', 'slot')

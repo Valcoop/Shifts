@@ -58,8 +58,12 @@ export class JobsResolver {
   async updateJob(
     @Args('input') { jobID, color, name }: UpdateJobInput,
   ): Promise<{ job: Job }> {
+    const job = await this.jobsService.findByID(Number(jobID));
+    // TODO: FIX ME
+    if (!job) throw new Error();
+
     return {
-      job: await this.jobsService.update(Number(jobID), {
+      job: await this.jobsService.update(job, {
         ...(color != null ? { color } : {}),
         ...(name != null ? { name } : {}),
       }),

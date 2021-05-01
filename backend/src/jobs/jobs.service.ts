@@ -49,9 +49,9 @@ export class JobsService {
     return this.jobRepository.save(this.jobRepository.create(jobDAO));
   }
 
-  update(id: number, jobDAO: Partial<JobDAO>): Promise<Job> {
+  update(job: Job, jobDAO: Partial<JobDAO>): Promise<Job> {
     return this.jobRepository.save(
-      this.jobRepository.create({ id, ...jobDAO }),
+      this.jobRepository.create({ ...job, ...jobDAO }),
     );
   }
 }

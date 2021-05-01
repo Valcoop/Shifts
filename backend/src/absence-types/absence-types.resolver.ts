@@ -46,11 +46,16 @@ export class AbsenceTypesResolver {
   async updateAbsenceType(
     @Args('input') { absenceTypeID, reason }: UpdateAbsenceTypeInput,
   ): Promise<{ absenceType: AbsenceType }> {
+    const absenceType = await this.absenceTypesService.findByID(
+      Number(absenceTypeID),
+    );
+    // TODO: FIX ME
+    if (!absenceType) throw new Error();
+
     return {
-      absenceType: await this.absenceTypesService.update(
-        Number(absenceTypeID),
-        { ...(reason != null ? { reason } : {}) },
-      ),
+      absenceType: await this.absenceTypesService.update(absenceType, {
+        ...(reason != null ? { reason } : {}),
+      }),
     };
   }
 }

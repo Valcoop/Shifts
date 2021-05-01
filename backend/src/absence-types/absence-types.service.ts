@@ -38,6 +38,10 @@ export class AbsenceTypesService {
     return nextPaginator.paginate(queryBuilder);
   }
 
+  findByID(id: number): Promise<AbsenceType | undefined> {
+    return this.absenceTypeRepository.findOne(id);
+  }
+
   save(reason: string): Promise<AbsenceType> {
     return this.absenceTypeRepository.save(
       this.absenceTypeRepository.create({ reason }),
@@ -45,12 +49,12 @@ export class AbsenceTypesService {
   }
 
   update(
-    absenceTypeID: number,
+    absenceType: AbsenceType,
     absenceTypeDAO: Partial<AbsenceTypeDAO>,
   ): Promise<AbsenceType> {
     return this.absenceTypeRepository.save(
       this.absenceTypeRepository.create({
-        id: absenceTypeID,
+        ...absenceType,
         ...absenceTypeDAO,
       }),
     );
