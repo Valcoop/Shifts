@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Slot } from '../slots/slots.entity';
 import { User } from '../users/users.entity';
+import { UserSlotAbsence } from './user-slots-absences.entity';
 
 @Entity('user_slots')
 export class UserSlot {
@@ -35,9 +37,15 @@ export class UserSlot {
   @Column()
   done: boolean;
 
-  // TODO: should we use relation
-  @Column()
-  userSlotAbsenceID?: number;
+  @Column({ nullable: true })
+  userSlotAbsenceID: number;
+
+  @OneToOne(
+    () => UserSlotAbsence,
+    (userSlotAbsence) => userSlotAbsence.userSlot,
+  )
+  @JoinColumn({ name: 'userSlotAbsenceID' })
+  userSlotAbsence?: UserSlotAbsence;
 
   @Column()
   isDeleted: boolean;
