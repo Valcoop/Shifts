@@ -4,9 +4,7 @@ import { Between, Repository } from 'typeorm';
 import { buildPaginator } from 'typeorm-cursor-pagination';
 import { SlotsInput } from '../graphql';
 import { Job } from '../jobs/jobs.entity';
-import { UserSlotAbsence } from '../user-slots/user-slots-absences.entity';
 import { UserSlot } from '../user-slots/user-slots.entity';
-import { User } from '../users/users.entity';
 import { Slot } from './slots.entity';
 
 interface SlotDAO {
@@ -24,11 +22,8 @@ interface SlotDAO {
 export class SlotsService {
   constructor(
     @InjectRepository(Slot) private slotRepository: Repository<Slot>,
-    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(UserSlot)
     private userSlotRepository: Repository<UserSlot>,
-    @InjectRepository(UserSlotAbsence)
-    private userSlotAbsenceRepository: Repository<UserSlotAbsence>,
   ) {}
 
   async find({
@@ -68,70 +63,6 @@ export class SlotsService {
 
   findByID(id: number): Promise<Slot | undefined> {
     return this.slotRepository.findOne(id, { relations: ['job'] });
-  }
-
-  // TODO: question : should it be moved to userslot ?
-  async book(
-    userID: number,
-    slotID: number,
-    { fullName, phoneNumber }: { fullName: string; phoneNumber: string },
-  ): Promise<Slot> {
-    const [slot, user] = await Promise.all([
-      this.slotRepository.findOne({
-        where: { id: slotID, active: true, isDeleted: false },
-        relations: ['job'],
-      }),
-      this.userRepository.findOne(userID),
-    ]);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-    // TODO: FIX ME
-    if (!user) throw new Error();
-
-    await this.userSlotRepository.save(
-      this.userSlotRepository.create({
-        done: false,
-        user,
-        slot,
-        fullName,
-        phoneNumber,
-        startDate: slot.startDate,
-        isDeleted: false,
-      }),
-    );
-
-    return slot;
-  }
-
-  // TODO: question : should it be moved to userslot ?
-  async cancelBooked(
-    userSlotID: number,
-    {
-      absenceTypeID,
-      description,
-    }: { absenceTypeID: number; description?: string },
-  ): Promise<Slot> {
-    const userSlot = await this.userSlotRepository.findOne(userSlotID, {
-      relations: ['slot', 'user'],
-    });
-    // TODO: FIX ME
-    if (!userSlot) throw new Error();
-
-    const userSlotAbsence = await this.userSlotAbsenceRepository.save(
-      this.userSlotAbsenceRepository.create({
-        userID: userSlot.userID,
-        absenceTypeID,
-        description,
-      }),
-    );
-
-    await this.userSlotRepository.save({
-      id: userSlot.id,
-      userSlotAbsenceID: userSlotAbsence.id,
-      isDeleted: true,
-    });
-
-    return userSlot.slot!;
   }
 
   save(slotDAO: SlotDAO): Promise<Slot> {

@@ -18,6 +18,8 @@ import {
 import { UserSlotConnection } from '../graphql-types';
 import { Job } from '../jobs/jobs.entity';
 import { JobsService } from '../jobs/jobs.service';
+import { UserSlotsService } from '../user-slots/user-slots.service';
+import { UsersService } from '../users/users.service';
 import { btoa } from '../utils';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
@@ -26,7 +28,9 @@ import { SlotsService } from './slots.service';
 export class SlotsResolver {
   constructor(
     private slotsService: SlotsService,
-    private jobService: JobsService,
+    private jobsService: JobsService,
+    private usersService: UsersService,
+    private userSlotsService: UserSlotsService,
   ) {}
 
   @Query()
@@ -38,12 +42,26 @@ export class SlotsResolver {
   async bookSlot(
     @Args('input') { userID, slotID, fullName, phoneNumber }: BookSlotInput,
   ): Promise<{ slot: Slot }> {
-    return {
-      slot: await this.slotsService.book(Number(userID), Number(slotID), {
-        fullName: fullName,
-        phoneNumber: phoneNumber,
-      }),
-    };
+    const [slot, user] = await Promise.all([
+      this.slotsService.findByID(Number(slotID)),
+      this.usersService.findByID(Number(userID)),
+    ]);
+    // TODO: FIX ME
+    if (!slot || !slot.active || slot.isDeleted) throw new Error();
+    // TODO: FIX ME
+    if (!user) throw new Error();
+
+    await this.userSlotsService.save({
+      done: false,
+      user,
+      slot,
+      fullName,
+      phoneNumber,
+      startDate: slot.startDate,
+      isDeleted: false,
+    });
+
+    return { slot };
   }
 
   @Mutation()
@@ -51,12 +69,18 @@ export class SlotsResolver {
     @Args('input')
     { userSlotID, absenceTypeID, description }: CancelBookedSlotInput,
   ): Promise<{ slot: Slot }> {
-    return {
-      slot: await this.slotsService.cancelBooked(Number(userSlotID), {
-        absenceTypeID: Number(absenceTypeID),
-        description,
-      }),
-    };
+    const userSlot = await this.userSlotsService.findByID(Number(userSlotID));
+    // TODO: FIX ME
+    if (!userSlot) throw new Error();
+    // TODO: FIX ME
+    if (userSlot.userSlotAbsenceID) throw new Error();
+
+    await this.userSlotsService.cancel(userSlot, {
+      absenceTypeID: Number(absenceTypeID),
+      description,
+    });
+
+    return { slot: userSlot.slot! };
   }
 
   @Mutation()
@@ -64,7 +88,7 @@ export class SlotsResolver {
     @Args('input')
     { active, duration, jobID, startDate, totalPlace }: AddSlotInput,
   ): Promise<{ slot: Slot }> {
-    const job = await this.jobService.findByID(Number(jobID));
+    const job = await this.jobsService.findByID(Number(jobID));
     // TODO: FIX ME
     if (!job) throw new Error();
 
@@ -102,7 +126,7 @@ export class SlotsResolver {
   ): Promise<{ slot: Slot }> {
     const [slot, job] = await Promise.all([
       this.slotsService.findByID(Number(slotID)),
-      jobID ? this.jobService.findByID(Number(jobID)) : undefined,
+      jobID ? this.jobsService.findByID(Number(jobID)) : undefined,
     ]);
     // TODO: FIX ME
     if (!slot) throw new Error();
@@ -126,7 +150,7 @@ export class SlotsResolver {
   async job(@Parent() slot: Slot): Promise<Job> {
     if (slot.job) return slot.job;
 
-    const job = await this.jobService.findByID(slot.jobID);
+    const job = await this.jobsService.findByID(slot.jobID);
     if (!job) throw new Error();
 
     return job;
