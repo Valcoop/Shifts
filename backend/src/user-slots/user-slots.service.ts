@@ -20,7 +20,7 @@ export class UserSlotsService {
   constructor(
     @InjectRepository(UserSlot)
     private userSlotRepository: Repository<UserSlot>,
-    @InjectRepository(UserSlot)
+    @InjectRepository(UserSlotAbsence)
     private userSlotAbsenceRepository: Repository<UserSlotAbsence>,
   ) {}
 
