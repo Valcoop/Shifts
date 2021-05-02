@@ -119,7 +119,7 @@ export class SlotsService {
 
     const userSlotAbsence = await this.userSlotAbsenceRepository.save(
       this.userSlotAbsenceRepository.create({
-        userID: userSlot.user.id,
+        userID: userSlot.userID,
         absenceTypeID,
         description,
       }),
@@ -131,7 +131,7 @@ export class SlotsService {
       isDeleted: true,
     });
 
-    return userSlot.slot;
+    return userSlot.slot!;
   }
 
   save(slotDAO: SlotDAO): Promise<Slot> {

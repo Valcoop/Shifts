@@ -18,4 +18,10 @@ export class UserSlotsResolver {
       }),
     };
   }
+
+  // @ResolveField()
+  // user(@Parent() user: User) {}
+
+  // @ResolveField()
+  // slot(@Parent() slot: Slot) {}
 }

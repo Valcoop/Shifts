@@ -5,6 +5,7 @@ import { join } from 'path';
 import { AbsenceTypesModule } from './absence-types/absence-types.module';
 import { JobsModule } from './jobs/jobs.module';
 import { SlotsModule } from './slots/slots.module';
+import { UserSlotsModule } from './user-slots/user-slots.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -13,6 +14,7 @@ import { UsersModule } from './users/users.module';
     JobsModule,
     SlotsModule,
     UsersModule,
+    UserSlotsModule,
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       definitions: { path: join(process.cwd(), 'src/graphql.ts') },

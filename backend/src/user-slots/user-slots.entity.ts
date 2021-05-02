@@ -15,13 +15,19 @@ export class UserSlot {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  userID: number;
+
   @ManyToOne(() => User, (user) => user.userSlots)
   @JoinColumn({ name: 'userID' })
-  user: User;
+  user?: User;
+
+  @Column({ nullable: true })
+  slotID: number;
 
   @ManyToOne(() => Slot, (slot) => slot.userSlots)
   @JoinColumn({ name: 'slotID' })
-  slot: Slot;
+  slot?: Slot;
 
   @Column()
   startDate: Date;
