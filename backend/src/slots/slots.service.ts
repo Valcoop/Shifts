@@ -78,7 +78,7 @@ export class SlotsService {
   ): Promise<Slot> {
     const [slot, user] = await Promise.all([
       this.slotRepository.findOne({
-        where: { id: slotID, isDeleted: false },
+        where: { id: slotID, active: true, isDeleted: false },
         relations: ['job'],
       }),
       this.userRepository.findOne(userID),
@@ -153,6 +153,7 @@ export class SlotsService {
     return this.userSlotRepository
       .createQueryBuilder('user_slot')
       .innerJoinAndSelect('user_slot.slot', 'slot')
+      .innerJoinAndSelect('user_slot.user', 'user')
       .where('user_slot.slotID = :slotID', { slotID })
       .andWhere('user_slot.isDeleted = false')
       .andWhere('slot.isDeleted = false')
@@ -167,6 +168,7 @@ export class SlotsService {
     const queryBuilder = this.userSlotRepository
       .createQueryBuilder('user_slot')
       .innerJoinAndSelect('user_slot.slot', 'slot')
+      .innerJoinAndSelect('user_slot.user', 'user')
       .where('user_slot.slotID = :slotID', { slotID })
       .andWhere('user_slot.isDeleted = false')
       .andWhere('slot.isDeleted = false')

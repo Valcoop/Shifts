@@ -21,6 +21,7 @@ export class UsersService {
     return this.userSlotRepository
       .createQueryBuilder('user_slot')
       .innerJoinAndSelect('user_slot.slot', 'slot')
+      .innerJoinAndSelect('user_slot.user', 'user')
       .where('user_slot.userID = :userID', { userID })
       .andWhere('user_slot.isDeleted = false')
       .andWhere('slot.isDeleted = false')
@@ -35,6 +36,7 @@ export class UsersService {
     const queryBuilder = this.userSlotRepository
       .createQueryBuilder('user_slot')
       .innerJoinAndSelect('user_slot.slot', 'slot')
+      .innerJoinAndSelect('user_slot.user', 'user')
       .where('user_slot.userID = :userID', { userID })
       .andWhere('user_slot.isDeleted = false')
       .andWhere('slot.isDeleted = false');

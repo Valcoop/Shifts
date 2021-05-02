@@ -16,6 +16,7 @@ import {
   UpdateSlotInput,
 } from '../graphql';
 import { UserSlotConnection } from '../graphql-types';
+import { Job } from '../jobs/jobs.entity';
 import { JobsService } from '../jobs/jobs.service';
 import { btoa } from '../utils';
 import { Slot } from './slots.entity';
@@ -119,6 +120,16 @@ export class SlotsResolver {
         ...(totalPlace != null ? { totalPlace } : {}),
       }),
     };
+  }
+
+  @ResolveField()
+  async job(@Parent() slot: Slot): Promise<Job> {
+    if (slot.job) return slot.job;
+
+    const job = await this.jobService.findByID(slot.jobID);
+    if (!job) throw new Error();
+
+    return job;
   }
 
   @ResolveField()

@@ -31,9 +31,12 @@ export class Slot {
   @Column()
   duration: number;
 
+  @Column({ nullable: true })
+  jobID: number;
+
   @ManyToOne(() => Job, (job) => job.slots)
   @JoinColumn({ name: 'jobID' })
-  job: Job;
+  job?: Job;
 
   @Column()
   totalPlace: number;
