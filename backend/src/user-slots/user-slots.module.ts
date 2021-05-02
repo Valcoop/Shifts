@@ -7,7 +7,7 @@ import { UserSlotsService } from './user-slots.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserSlot, UserSlotAbsence])],
-  exports: [UserSlotsService],
+  exports: [UserSlotsService, TypeOrmModule],
   providers: [UserSlotsResolver, UserSlotsService],
 })
 export class UserSlotsModule {}
