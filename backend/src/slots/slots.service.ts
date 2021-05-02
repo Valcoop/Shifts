@@ -67,7 +67,7 @@ export class SlotsService {
   }
 
   findByID(id: number): Promise<Slot | undefined> {
-    return this.slotRepository.findOne(id);
+    return this.slotRepository.findOne(id, { relations: ['job'] });
   }
 
   // TODO: question : should it be moved to userslot ?
@@ -77,7 +77,10 @@ export class SlotsService {
     { fullName, phoneNumber }: { fullName: string; phoneNumber: string },
   ): Promise<Slot> {
     const [slot, user] = await Promise.all([
-      this.slotRepository.findOne({ where: { id: slotID, isDeleted: false } }),
+      this.slotRepository.findOne({
+        where: { id: slotID, isDeleted: false },
+        relations: ['job'],
+      }),
       this.userRepository.findOne(userID),
     ]);
     // TODO: FIX ME

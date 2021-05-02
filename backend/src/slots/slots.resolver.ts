@@ -99,9 +99,14 @@ export class SlotsResolver {
     @Args('input')
     { slotID, active, duration, jobID, startDate, totalPlace }: UpdateSlotInput,
   ): Promise<{ slot: Slot }> {
-    const slot = await this.slotsService.findByID(Number(slotID));
+    const [slot, job] = await Promise.all([
+      this.slotsService.findByID(Number(slotID)),
+      jobID ? this.jobService.findByID(Number(jobID)) : undefined,
+    ]);
     // TODO: FIX ME
     if (!slot) throw new Error();
+    // TODO: FIX ME
+    if (jobID && !job) throw new Error();
 
     return {
       slot: await this.slotsService.update(slot, {
@@ -110,7 +115,7 @@ export class SlotsResolver {
         ...(active != null ? { active } : {}),
         ...(startDate != null ? { startDate } : {}),
         ...(duration != null ? { duration } : {}),
-        ...(jobID != null ? { jobID: Number(jobID) } : {}),
+        ...(job != null ? { job } : {}),
         ...(totalPlace != null ? { totalPlace } : {}),
       }),
     };
