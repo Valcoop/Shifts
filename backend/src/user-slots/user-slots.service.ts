@@ -39,11 +39,13 @@ export class UserSlotsService {
       }),
     );
 
-    return this.userSlotRepository.save({
-      id: userSlot.id,
-      userSlotAbsenceID: userSlotAbsence.id,
-      isDeleted: true,
-    });
+    return this.userSlotRepository.save(
+      this.userSlotRepository.create({
+        ...userSlot,
+        userSlotAbsenceID: userSlotAbsence.id,
+        isDeleted: true,
+      }),
+    );
   }
 
   findByID(id: number): Promise<UserSlot | undefined> {

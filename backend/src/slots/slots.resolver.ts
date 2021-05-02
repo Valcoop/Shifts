@@ -18,6 +18,7 @@ import {
 import { UserSlotConnection } from '../graphql-types';
 import { Job } from '../jobs/jobs.entity';
 import { JobsService } from '../jobs/jobs.service';
+import { UserSlot } from '../user-slots/user-slots.entity';
 import { UserSlotsService } from '../user-slots/user-slots.service';
 import { UsersService } from '../users/users.service';
 import { btoa } from '../utils';
@@ -41,7 +42,7 @@ export class SlotsResolver {
   @Mutation()
   async bookSlot(
     @Args('input') { userID, slotID, fullName, phoneNumber }: BookSlotInput,
-  ): Promise<{ slot: Slot }> {
+  ): Promise<{ userSlot: UserSlot }> {
     const [slot, user] = await Promise.all([
       this.slotsService.findByID(Number(slotID)),
       this.usersService.findByID(Number(userID)),
@@ -51,36 +52,36 @@ export class SlotsResolver {
     // TODO: FIX ME
     if (!user) throw new Error();
 
-    await this.userSlotsService.save({
-      done: false,
-      user,
-      slot,
-      fullName,
-      phoneNumber,
-      startDate: slot.startDate,
-      isDeleted: false,
-    });
-
-    return { slot };
+    return {
+      userSlot: await this.userSlotsService.save({
+        done: false,
+        user,
+        slot,
+        fullName,
+        phoneNumber,
+        startDate: slot.startDate,
+        isDeleted: false,
+      }),
+    };
   }
 
   @Mutation()
   async cancelBookedSlot(
     @Args('input')
     { userSlotID, absenceTypeID, description }: CancelBookedSlotInput,
-  ): Promise<{ slot: Slot }> {
+  ): Promise<{ userSlot: UserSlot }> {
     const userSlot = await this.userSlotsService.findByID(Number(userSlotID));
     // TODO: FIX ME
     if (!userSlot) throw new Error();
     // TODO: FIX ME
     if (userSlot.userSlotAbsenceID) throw new Error();
 
-    await this.userSlotsService.cancel(userSlot, {
-      absenceTypeID: Number(absenceTypeID),
-      description,
-    });
-
-    return { slot: userSlot.slot! };
+    return {
+      userSlot: await this.userSlotsService.cancel(userSlot, {
+        absenceTypeID: Number(absenceTypeID),
+        description,
+      }),
+    };
   }
 
   @Mutation()

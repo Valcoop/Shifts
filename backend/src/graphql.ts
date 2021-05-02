@@ -179,11 +179,11 @@ export interface PageInfo {
 }
 
 export interface BookSlotPayload {
-    slot: Slot;
+    userSlot: UserSlot;
 }
 
 export interface CancelBookedSlotPayload {
-    slot: Slot;
+    userSlot: UserSlot;
 }
 
 export interface AddSlotPayload {
