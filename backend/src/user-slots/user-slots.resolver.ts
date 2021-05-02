@@ -11,8 +11,12 @@ export class UserSlotsResolver {
   async updateUserSlot(
     @Args('input') { userSlotID, fullname, phoneNumber }: UpdateUserSlotInput,
   ): Promise<{ userSlot: UserSlot }> {
+    const userSlot = await this.userSlotsService.findByID(Number(userSlotID));
+    // TODO: FIX ME
+    if (!userSlot) throw new Error();
+
     return {
-      userSlot: await this.userSlotsService.updateUserSlot(Number(userSlotID), {
+      userSlot: await this.userSlotsService.update(userSlot, {
         ...(fullname != null ? { fullname } : {}),
         ...(phoneNumber != null ? { phoneNumber } : {}),
       }),

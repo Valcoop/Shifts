@@ -15,12 +15,16 @@ export class UserSlotsService {
     private userSlotRepository: Repository<UserSlot>,
   ) {}
 
-  updateUserSlot(id: number, userSlotDAO: Partial<UserSlotDAO>) {
+  findByID(id: number): Promise<UserSlot | undefined> {
+    return this.userSlotRepository.findOne(id, { relations: ['slot', 'user'] });
+  }
+
+  update(
+    userSlot: UserSlot,
+    userSlotDAO: Partial<UserSlotDAO>,
+  ): Promise<UserSlot> {
     return this.userSlotRepository.save(
-      this.userSlotRepository.create({
-        id,
-        ...userSlotDAO,
-      }),
+      this.userSlotRepository.create({ ...userSlot, ...userSlotDAO }),
     );
   }
 }
