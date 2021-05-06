@@ -18,10 +18,7 @@ export class User {
   externalID: string;
 
   @Column()
-  firstname: string;
-
-  @Column()
-  lastname: string;
+  fullName: string;
 
   @Column()
   phoneNumber: string;

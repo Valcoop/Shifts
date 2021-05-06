@@ -7,8 +7,7 @@ import { User } from './users.entity';
 
 interface UserDAO {
   externalID: string;
-  firstname: string;
-  lastname: string;
+  fullName: string;
   phoneNumber: string;
   isAdmin: boolean;
 }
@@ -21,7 +20,7 @@ export class UsersService {
     private userSlotRepository: Repository<UserSlot>,
   ) {}
 
-  // TODO: should we duplicate fields (firstname, lastname, phoneNumber, isAdmin) or get it from nextcloud
+  // TODO: should we duplicate fields (fullName, phoneNumber, isAdmin) or get it from nextcloud
   create(userDAO: UserDAO): Promise<User> {
     return this.userRepository.save(this.userRepository.create(userDAO));
   }

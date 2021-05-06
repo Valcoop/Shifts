@@ -68,8 +68,7 @@ export class AuthController {
         // TODO: Use correct data
         await this.usersService.create({
           externalID,
-          firstname: '',
-          lastname: '',
+          fullName: externalUser.displayname,
           phoneNumber: externalUser.phone,
           isAdmin: false,
         });
