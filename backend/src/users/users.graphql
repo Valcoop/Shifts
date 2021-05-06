@@ -16,7 +16,7 @@ type UserEdge {
 type User {
   id: ID!
   fullName: String!
-  phoneNumber: String!
+  phoneNumber: String
   userSlots(input: UserUserSlotsInput!): UserSlotConnection!
 }
 

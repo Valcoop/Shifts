@@ -8,7 +8,7 @@ import { User } from './users.entity';
 interface UserDAO {
   externalID: string;
   fullName: string;
-  phoneNumber: string;
+  phoneNumber?: string;
   isAdmin: boolean;
 }
 

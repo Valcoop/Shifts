@@ -20,8 +20,8 @@ export class User {
   @Column()
   fullName: string;
 
-  @Column()
-  phoneNumber: string;
+  @Column({ nullable: true })
+  phoneNumber?: string;
 
   @Column()
   isAdmin: boolean;

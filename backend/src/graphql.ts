@@ -246,6 +246,6 @@ export interface UserEdge {
 export interface User {
     id: string;
     fullName: string;
-    phoneNumber: string;
+    phoneNumber?: string;
     userSlots: UserSlotConnection;
 }

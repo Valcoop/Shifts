@@ -59,17 +59,17 @@ export class AuthController {
             data: {
               id: string;
               displayname: string;
-              phone: string;
+              phone?: string;
               groups: { element: string }[];
             };
           };
         };
 
-        // TODO: Use correct data
         await this.usersService.create({
           externalID,
           fullName: externalUser.displayname,
-          phoneNumber: externalUser.phone,
+          phoneNumber: externalUser.phone || undefined,
+          // TODO: Use correct data
           isAdmin: false,
         });
       }
