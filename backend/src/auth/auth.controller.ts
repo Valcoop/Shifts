@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Redirect, Res } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
@@ -13,11 +13,14 @@ export class AuthController {
   constructor(private usersService: UsersService) {
     this.client = new AuthorizationCode({
       client: {
+        // TODO: use env var
         id: '8aSPndK3XtZsPbbfOugInfpi6FDZI1K6QsFBG6vbLKEZKdzfDbcubMQtL3R9Rh28',
+        // TODO: use env var
         secret:
           'nSnFd5kNIaJpcgvwe4HtiYRKijhl93SeNiPvYyNhpvytdoOZimLKTwXqQNuZqE9Q',
       },
       auth: {
+        // TODO: use env var
         tokenHost: 'http://localhost:8080',
         tokenPath: '/apps/oauth2/api/v1/token',
         authorizePath: '/apps/oauth2/authorize',
@@ -27,11 +30,10 @@ export class AuthController {
   }
 
   @Get('/login')
-  @Redirect('https://nestjs.com', 301)
-  login(): { url: string } {
-    return {
-      url: this.client.authorizeURL({ redirect_uri: this.CALLBACK_URL }),
-    };
+  login(@Res() res: Response) {
+    return res.redirect(
+      this.client.authorizeURL({ redirect_uri: this.CALLBACK_URL }),
+    );
   }
 
   @Get('redirect')
@@ -74,8 +76,10 @@ export class AuthController {
         });
       }
 
+      // TODO: FIX ME
       return res.send('Logged in');
     } catch (error) {
+      // TODO: FIX ME
       console.error('Access Token Error', error.message);
       return res.status(500).json('Authentication failed');
     }
