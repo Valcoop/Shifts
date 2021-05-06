@@ -1,9 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { buildPaginator } from 'typeorm-cursor-pagination';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from './users.entity';
+
+interface UserDAO {
+  externalID: string;
+  firstname: string;
+  lastname: string;
+  phoneNumber: string;
+  isAdmin: boolean;
+}
 
 @Injectable()
 export class UsersService {
@@ -13,8 +21,17 @@ export class UsersService {
     private userSlotRepository: Repository<UserSlot>,
   ) {}
 
+  // TODO: should we duplicate fields (firstname, lastname, phoneNumber, isAdmin) or get it from nextcloud
+  create(userDAO: UserDAO): Promise<User> {
+    return this.userRepository.save(this.userRepository.create(userDAO));
+  }
+
   findByID(id: number): Promise<User | undefined> {
     return this.userRepository.findOne(id);
+  }
+
+  findOne(filters: FindOneOptions<User>): Promise<User | undefined> {
+    return this.userRepository.findOne(filters);
   }
 
   countUserSlots(userID: number) {

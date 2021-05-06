@@ -15,6 +15,9 @@ export class User {
   id: number;
 
   @Column()
+  externalID: string;
+
+  @Column()
   firstname: string;
 
   @Column()

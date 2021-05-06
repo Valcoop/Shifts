@@ -3,6 +3,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AbsenceTypesModule } from './absence-types/absence-types.module';
+import { AuthModule } from './auth/auth.module';
 import { JobsModule } from './jobs/jobs.module';
 import { SlotsModule } from './slots/slots.module';
 import { UserSlotsModule } from './user-slots/user-slots.module';
@@ -11,6 +12,7 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     AbsenceTypesModule,
+    AuthModule,
     JobsModule,
     SlotsModule,
     UsersModule,
