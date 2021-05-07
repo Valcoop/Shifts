@@ -20,6 +20,7 @@ export interface NextcloudUser {
 @Controller('auth')
 export class AuthController {
   private readonly CALLBACK_URL = 'http://localhost:3000/auth/redirect';
+
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
@@ -39,34 +40,40 @@ export class AuthController {
     try {
       // TODO: FIX ME
       if (!req.code) throw new Error();
+
       const token = await this.authService.getClient().getToken({
         code: req.code,
         redirect_uri: this.CALLBACK_URL,
       });
 
       const externalID = token.token.user_id;
+      const data = await fetch(
+        'http://localhost:8080/ocs/v1.php/cloud/users/' + externalID,
+        { headers: { Authorization: 'Bearer ' + token.token.access_token } },
+      );
+
+      const {
+        ocs: {
+          data: externalUser,
+          meta: { status },
+        },
+      } = parser.parse(await data.text()) as NextcloudUser;
+      // TODO: FIX ME
+      if (status !== 'ok') throw new Error();
+      // TODO: FIX ME
+      if (!externalUser) return false;
+
       const user = await this.usersService.findOne({ where: { externalID } });
-      // TODO: Update user info (and on refresh token too)
-      if (!user) {
-        const data = await fetch(
-          'http://localhost:8080/ocs/v1.php/cloud/users/' + externalID,
-          { headers: { Authorization: 'Bearer ' + token.token.access_token } },
-        );
 
-        // TODO: handle no user
-        const {
-          ocs: { data: externalUser },
-        } = parser.parse(await data.text()) as NextcloudUser;
-
-        await this.usersService.create({
-          externalID,
-          fullName: externalUser.displayname,
-          phoneNumber: externalUser.phone || undefined,
-          // TODO: Use correct data
-          isAdmin: false,
-          token: JSON.stringify(token),
-        });
-      }
+      await this.usersService.create({
+        ...user,
+        externalID,
+        fullName: externalUser.displayname,
+        phoneNumber: externalUser.phone || undefined,
+        // TODO: Use correct data
+        isAdmin: false,
+        token: JSON.stringify(token),
+      });
 
       // TODO: FIX ME
       return res.send('Logged in');

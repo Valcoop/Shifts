@@ -21,7 +21,6 @@ export class UsersService {
     private userSlotRepository: Repository<UserSlot>,
   ) {}
 
-  // TODO: should we duplicate fields (fullName, phoneNumber, isAdmin) or get it from nextcloud
   create(userDAO: UserDAO): Promise<User> {
     return this.userRepository.save(this.userRepository.create(userDAO));
   }
