@@ -7,11 +7,6 @@ import { AuthorizationCode } from 'simple-oauth2';
 import { User } from '../users/users.entity';
 import { NextcloudUser } from './auth.controller';
 
-// TODO: change naming
-export interface AuthenticatedContext {
-  req: Request & { user?: User };
-}
-
 @Injectable()
 export class AuthGuard implements CanActivate {
   private client: AuthorizationCode;
@@ -35,17 +30,10 @@ export class AuthGuard implements CanActivate {
     });
   }
 
-  private async getAccessToken(
-    req: AuthenticatedContext['req'] & { user: User },
-  ) {
-    const accessToken =
-      req.header('Authorization') &&
-      (req.header('Authorization') as string).split('Bearer ')[1];
-    if (!accessToken) return undefined;
+  private async getAccessToken(accessToken: string | undefined, user: User) {
+    if (!accessToken || !user.token) return undefined;
 
-    if (!req.user.token) return undefined;
-
-    const token = this.client.createToken(JSON.parse(req.user.token));
+    const token = this.client.createToken(JSON.parse(user.token));
     if (!token.expired()) return accessToken;
 
     try {
@@ -58,13 +46,15 @@ export class AuthGuard implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const { req } = GqlExecutionContext.create(
-      context,
-    ).getContext() as AuthenticatedContext;
+    const { req } = GqlExecutionContext.create(context).getContext() as {
+      req: Request & { user?: User };
+    };
     if (!req.user) return false;
 
-    // @ts-ignore
-    const accessToken = await this.getAccessToken(req);
+    const accessToken = await this.getAccessToken(
+      req.header('Authorization')?.split('Bearer ')[1],
+      req.user,
+    );
     if (!accessToken) return false;
 
     const data = await fetch(
