@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AbsenceTypesModule } from './absence-types/absence-types.module';
 import { AuthModule } from './auth/auth.module';
 import { JobsModule } from './jobs/jobs.module';
+import LoginMiddleware from './login.middleware';
 import { SlotsModule } from './slots/slots.module';
 import { UserSlotsModule } from './user-slots/user-slots.module';
 import { UsersModule } from './users/users.module';
@@ -33,4 +34,8 @@ import { UsersModule } from './users/users.module';
     }),
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoginMiddleware).forRoutes('*');
+  }
+}
