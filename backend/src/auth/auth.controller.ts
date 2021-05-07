@@ -2,8 +2,8 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
-import { AuthorizationCode } from 'simple-oauth2';
 import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
 
 export interface NextcloudUser {
   ocs: {
@@ -13,37 +13,24 @@ export interface NextcloudUser {
       phone?: string;
       groups: { element: string }[];
     };
+    meta: { status: string };
   };
 }
 
 @Controller('auth')
 export class AuthController {
   private readonly CALLBACK_URL = 'http://localhost:3000/auth/redirect';
-  private client: AuthorizationCode<'client_id'>;
-
-  constructor(private usersService: UsersService) {
-    this.client = new AuthorizationCode({
-      client: {
-        // TODO: use env var
-        id: '8aSPndK3XtZsPbbfOugInfpi6FDZI1K6QsFBG6vbLKEZKdzfDbcubMQtL3R9Rh28',
-        // TODO: use env var
-        secret:
-          'nSnFd5kNIaJpcgvwe4HtiYRKijhl93SeNiPvYyNhpvytdoOZimLKTwXqQNuZqE9Q',
-      },
-      auth: {
-        // TODO: use env var
-        tokenHost: 'http://localhost:8080',
-        tokenPath: '/apps/oauth2/api/v1/token',
-        authorizePath: '/apps/oauth2/authorize',
-      },
-      options: { authorizationMethod: 'body' },
-    });
-  }
+  constructor(
+    private usersService: UsersService,
+    private authService: AuthService,
+  ) {}
 
   @Get('/login')
   login(@Res() res: Response) {
     return res.redirect(
-      this.client.authorizeURL({ redirect_uri: this.CALLBACK_URL }),
+      this.authService
+        .getClient()
+        .authorizeURL({ redirect_uri: this.CALLBACK_URL }),
     );
   }
 
@@ -52,18 +39,18 @@ export class AuthController {
     try {
       // TODO: FIX ME
       if (!req.code) throw new Error();
-      const { token } = await this.client.getToken({
+      const token = await this.authService.getClient().getToken({
         code: req.code,
         redirect_uri: this.CALLBACK_URL,
       });
 
-      const externalID = token.user_id;
+      const externalID = token.token.user_id;
       const user = await this.usersService.findOne({ where: { externalID } });
       // TODO: Update user info (and on refresh token too)
       if (!user) {
         const data = await fetch(
           'http://localhost:8080/ocs/v1.php/cloud/users/' + externalID,
-          { headers: { Authorization: 'Bearer ' + token.access_token } },
+          { headers: { Authorization: 'Bearer ' + token.token.access_token } },
         );
 
         // TODO: handle no user
@@ -77,6 +64,7 @@ export class AuthController {
           phoneNumber: externalUser.phone || undefined,
           // TODO: Use correct data
           isAdmin: false,
+          token: JSON.stringify(token),
         });
       }
 

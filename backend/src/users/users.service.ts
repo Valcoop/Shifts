@@ -10,6 +10,7 @@ interface UserDAO {
   fullName: string;
   phoneNumber?: string;
   isAdmin: boolean;
+  token?: string;
 }
 
 @Injectable()
