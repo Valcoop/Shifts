@@ -9,7 +9,7 @@ export class UserSlotsResolver {
 
   @Mutation()
   async updateUserSlot(
-    @Args('input') { userSlotID, fullname, phoneNumber }: UpdateUserSlotInput,
+    @Args('input') { userSlotID, fullName, phoneNumber }: UpdateUserSlotInput,
   ): Promise<{ userSlot: UserSlot }> {
     const userSlot = await this.userSlotsService.findByID(Number(userSlotID));
     // TODO: FIX ME
@@ -17,7 +17,7 @@ export class UserSlotsResolver {
 
     return {
       userSlot: await this.userSlotsService.update(userSlot, {
-        ...(fullname != null ? { fullname } : {}),
+        ...(fullName != null ? { fullName } : {}),
         ...(phoneNumber != null ? { phoneNumber } : {}),
       }),
     };

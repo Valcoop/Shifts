@@ -26,7 +26,7 @@ export class UsersResolver {
       this.userService.countUserSlots(user.id),
       this.userService.getUserSlots(
         user.id,
-        { startDate: input.stardDate },
+        { startDate: input.startDate },
         { first: input.first, after: input.after },
       ),
     ]);

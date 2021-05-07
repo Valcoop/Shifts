@@ -26,17 +26,17 @@ export const UPDATE_ABSENCE_TYPE_MUTATION = gql`mutation ($absenceTypeID: ID!, $
 
 export const UPDATE_USER_SLOT_MUTATION = gql`mutation ($userSlotID: ID!, $fullName: String!, $phoneNumber: String) {
     updateUserSlot(input: { userSlotID: $userSlotID, fullName: $fullName, phoneNumber: $phoneNumber }) {
-      attendee {
-        userSlotID
+      user {
+        id
       }
     }
   }`
 
 export const REMOVE_SLOT_MUTATION = gql`mutation ($slotID: ID!) {
         removeSlot(input: { slotID: $slotID}) {
-        slot {
-            id
-        }
+          slot {
+              id
+          }
         }
     }`
 
@@ -44,8 +44,10 @@ export const CANCEL_BOOK_SLOT_MUTATION = gql`mutation ($userSlotID: ID!, $absenc
     cancelBookedSlot(
       input: { userSlotID: $userSlotID, absenceTypeID: $absenceTypeID, description: $description }
     ) {
-      slot {
-        id
+      userSlot {
+        slot {
+          id
+        }
       }
     }
   }`
@@ -79,7 +81,7 @@ export const ADD_JOB_MUTATION = gql`mutation ($name: String!, $color: String!) {
 
 export const BOOK_SLOT_MUTATION = gql`mutation ($userID: String!, $slotID: ID!, $fullName: String!, $phoneNumber: String!) {
     bookSlot(input: { userID: $userID, slotID: $slotID, fullName: $fullName, phoneNumber: $phoneNumber }) {
-      slot {
+      userSlot {
         id
       }
     }
@@ -100,7 +102,7 @@ export const JOBS_QUERY = gql`
 
 export const ABSENCE_TYPES_QUERY = gql`
     {
-        absenceTypes{
+        absenceTypes(input: {}) {
             edges{
             node{
                 id 
@@ -139,14 +141,17 @@ export const ACTIVE_NON_FULL_SLOTS_QUERY = gql`query ($startDate: Date!, $endDat
           name
           color
           }
-          attendees(input: {}) {
-          totalCount
-          edges {
-              node {
-              userSlotID
-              fullName
-              }
-          }
+          userSlots(input: {}) {
+            totalCount
+            edges {
+                node {
+                  id
+                  user {
+                    id
+                  }
+                  fullName
+                }
+            }
           }
           totalPlace
           active
@@ -160,26 +165,40 @@ export const ACTIVE_PARAM_SLOTS_QUERY = gql`query ($startDate: Date!, $endDate: 
       startDate
       duration
       job {id name color}
-      attendees(input: {}) {edges{node{userSlotID fullName}}}
+      userSlots(input: {}) {
+        totalCount
+        edges {
+            node {
+              id
+              user {
+                id
+              }
+              fullName
+            }
+        }
+      }
       totalPlace
       active
     }
   }`
 
-export const USER_QUERY = gql`query ($userID: ID!) {
+export const USER_QUERY = gql`query ($userID: ID!, $startDate: Date) {
     user(userID: $userID) {
       id
       firstname
       lastname
       phoneNumber
-      slots(input: {first:20}) {
+      userSlots(input: {first:20, startDate: $startDate}) {
         edges {
           node {
               id
-              startDate
-              duration
-              job {id name}
-              attendees(input: {}) {edges {node{userSlotID userID fullName phoneNumber}}}
+              slot {
+                id
+                startDate
+                duration
+                job {id name}
+                userSlots(input: {}) {edges {node{id user{id} fullName phoneNumber}}}
+              }              
           }
         }
       }

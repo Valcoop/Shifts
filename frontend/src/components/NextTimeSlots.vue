@@ -110,9 +110,9 @@ export default {
         data.slots.forEach(
           function (slot) {
             const participants = []
-            slot.attendees.edges.forEach(
+            slot.userSlots.edges.forEach(
               function (edge) {
-                participants.push({ userSlotId: edge.node.userSlotId, fullName: edge.node.fullName })
+                participants.push({ userSlotId: edge.node.id, fullName: edge.node.fullName })
               }
             )
             nextTimeSlots.push(

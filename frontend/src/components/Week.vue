@@ -195,7 +195,7 @@ export default {
         data.slots.forEach(
           function(slot){
             const participants = []
-            slot.attendees.edges.forEach(function(edge){participants.push({fullName: edge.node.fullName, userSlotID: edge.node.userSlotID})})
+            slot.userSlots.edges.forEach(function(edge){participants.push({fullName: edge.node.fullName, userSlotID: edge.node.id})})
             const options = {
               year: 'numeric', month: '2-digit', day: '2-digit',
               hour: '2-digit', minute: '2-digit', second: '2-digit',

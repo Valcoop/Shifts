@@ -96,7 +96,7 @@ export interface UpdateUserSlotInput {
 export interface UserUserSlotsInput {
     first?: number;
     after?: string;
-    stardDate?: Date;
+    startDate?: Date;
 }
 
 export interface IQuery {

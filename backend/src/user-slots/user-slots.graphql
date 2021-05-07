@@ -4,7 +4,7 @@ type Mutation {
 
 input UpdateUserSlotInput {
   userSlotID: ID!
-  fullname: String
+  fullName: String
   phoneNumber: String
 }
 

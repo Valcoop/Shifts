@@ -110,32 +110,33 @@ export default {
         // Parameters
         variables () {
           return {
-            userID: this.$q.cookies.get('userId')
+            userID: this.$q.cookies.get('userId'),
+            startDate: new Date()
           }
         },
         fetchPolicy: 'cache-and-network',
       update: data => {
         const reservedtimeSlots = []
         const userID = data.user.id
-        for (let keySlot in data.user.slots.edges){
-          const edge = data.user.slots.edges[keySlot]
+        for (let keySlot in data.user.userSlots.edges){
+          const edge = data.user.userSlots.edges[keySlot]
           const options = {
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', second: '2-digit',
             timeZone: 'Europe/Paris'
           }
           const formatter = new Intl.DateTimeFormat('sv-SE', options)
-          for (let keyParticipant in edge.node.attendees.edges) {
-            const participant = edge.node.attendees.edges[keyParticipant]
-            if (participant.node.userID == userID){
+          for (let keyParticipant in edge.node.slot.userSlots.edges) {
+            const participant = edge.node.slot.userSlots.edges[keyParticipant]
+            if (participant.node.id == edge.node.id){
               reservedtimeSlots.push(
                 { 
-                  userSlotID: participant.node.userSlotID,
-                  slotID: edge.node.id,
-                  date: formatter.format(new Date(edge.node.startDate)).slice(0, 10),
-                  time: formatter.format(new Date(edge.node.startDate)).slice(11, 16),
-                  duration: edge.node.duration,
-                  poste: edge.node.job.name,
+                  userSlotID: participant.node.id,
+                  slotID: edge.node.slot.id,
+                  date: formatter.format(new Date(edge.node.slot.startDate)).slice(0, 10),
+                  time: formatter.format(new Date(edge.node.slot.startDate)).slice(11, 16),
+                  duration: edge.node.slot.duration,
+                  poste: edge.node.slot.job.name,
                   name: participant.node.fullName,
                   phone: participant.node.phoneNumber
                 }
