@@ -5,6 +5,17 @@ import fetch from 'node-fetch';
 import { AuthorizationCode } from 'simple-oauth2';
 import { UsersService } from '../users/users.service';
 
+export interface NextcloudUser {
+  ocs: {
+    data: {
+      id: string;
+      displayname: string;
+      phone?: string;
+      groups: { element: string }[];
+    };
+  };
+}
+
 @Controller('auth')
 export class AuthController {
   private readonly CALLBACK_URL = 'http://localhost:3000/auth/redirect';
@@ -48,24 +59,17 @@ export class AuthController {
 
       const externalID = token.user_id;
       const user = await this.usersService.findOne({ where: { externalID } });
+      // TODO: Update user info (and on refresh token too)
       if (!user) {
         const data = await fetch(
           'http://localhost:8080/ocs/v1.php/cloud/users/' + externalID,
           { headers: { Authorization: 'Bearer ' + token.access_token } },
         );
 
+        // TODO: handle no user
         const {
           ocs: { data: externalUser },
-        } = parser.parse(await data.text()) as {
-          ocs: {
-            data: {
-              id: string;
-              displayname: string;
-              phone?: string;
-              groups: { element: string }[];
-            };
-          };
-        };
+        } = parser.parse(await data.text()) as NextcloudUser;
 
         await this.usersService.create({
           externalID,

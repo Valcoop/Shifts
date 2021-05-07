@@ -20,6 +20,7 @@ import { UsersModule } from './users/users.module';
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       definitions: { path: join(process.cwd(), 'src/graphql.ts') },
+      context: ({ req }) => ({ req }),
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
