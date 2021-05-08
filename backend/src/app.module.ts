@@ -1,9 +1,11 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AbsenceTypesModule } from './absence-types/absence-types.module';
 import { AuthModule } from './auth/auth.module';
+import { RolesGuard } from './guards/roles.guard';
 import { JobsModule } from './jobs/jobs.module';
 import LoginMiddleware from './login.middleware';
 import { SlotsModule } from './slots/slots.module';
@@ -32,6 +34,12 @@ import { UsersModule } from './users/users.module';
       database: process.env.DB,
       autoLoadEntities: true,
     }),
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {
