@@ -9,11 +9,11 @@ import { Request } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
 import { User } from '../users/users.entity';
-import { NextcloudUser } from './auth.controller';
-import { AuthService } from './auth.service';
+import { NextcloudUser } from '../auth/auth.controller';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
-export class AuthInterceptor implements NestInterceptor {
+export class TokenInterceptor implements NestInterceptor {
   constructor(private authService: AuthService) {}
 
   private async getToken(accessToken: string | undefined, user: User) {
