@@ -1,15 +1,21 @@
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Roles } from '../decorator/roles.decorator';
 import {
   AbsenceTypesInput,
   AddAbsenceTypeInput,
   UpdateAbsenceTypeInput,
 } from '../graphql';
 import { AbsenceTypeConnection } from '../graphql-types';
+import { AuthGuard } from '../guards/auth.guard';
+import { TokenInterceptor } from '../interceptors/token.interceptor';
 import { btoa } from '../utils';
 import { AbsenceType } from './absence-types.entity';
 import { AbsenceTypesService } from './absence-types.service';
 
 @Resolver()
+@UseGuards(AuthGuard)
+@Roles('admin')
 export class AbsenceTypesResolver {
   constructor(private absenceTypesService: AbsenceTypesService) {}
 
@@ -36,6 +42,7 @@ export class AbsenceTypesResolver {
   }
 
   @Mutation()
+  @UseInterceptors(TokenInterceptor)
   async addAbsenceType(
     @Args('input') input: AddAbsenceTypeInput,
   ): Promise<{ absenceType: AbsenceType }> {
@@ -43,6 +50,7 @@ export class AbsenceTypesResolver {
   }
 
   @Mutation()
+  @UseInterceptors(TokenInterceptor)
   async updateAbsenceType(
     @Args('input') { absenceTypeID, reason }: UpdateAbsenceTypeInput,
   ): Promise<{ absenceType: AbsenceType }> {

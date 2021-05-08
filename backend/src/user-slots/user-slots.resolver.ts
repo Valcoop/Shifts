@@ -1,5 +1,8 @@
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { UpdateUserSlotInput } from '../graphql';
+import { AuthGuard } from '../guards/auth.guard';
+import { TokenInterceptor } from '../interceptors/token.interceptor';
 import { UserSlot } from './user-slots.entity';
 import { UserSlotsService } from './user-slots.service';
 
@@ -8,6 +11,8 @@ export class UserSlotsResolver {
   constructor(private userSlotsService: UserSlotsService) {}
 
   @Mutation()
+  @UseGuards(AuthGuard)
+  @UseInterceptors(TokenInterceptor)
   async updateUserSlot(
     @Args('input') { userSlotID, fullName, phoneNumber }: UpdateUserSlotInput,
   ): Promise<{ userSlot: UserSlot }> {
