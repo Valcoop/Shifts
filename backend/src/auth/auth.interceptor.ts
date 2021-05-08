@@ -9,24 +9,27 @@ import { Request } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
 import { User } from '../users/users.entity';
+import { UsersService } from '../users/users.service';
 import { NextcloudUser } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthInterceptor implements NestInterceptor {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private usersService: UsersService,
+    private authService: AuthService,
+  ) {}
 
-  private async getAccessToken(accessToken: string | undefined, user: User) {
+  private async getToken(accessToken: string | undefined, user: User) {
     if (!accessToken || !user.token) return undefined;
 
     const token = this.authService
       .getClient()
       .createToken(JSON.parse(user.token));
-    if (!token.expired()) return accessToken;
+    if (!token.expired()) return token.token;
 
     try {
-      // TODO: does not work
-      return (await token.refresh()).token.access_token as string;
+      return (await token.refresh()).token;
     } catch (error) {
       // TODO: FIX ME
       console.log('Error refreshing access token: ', error.message);
@@ -40,15 +43,16 @@ export class AuthInterceptor implements NestInterceptor {
     };
     if (!req.user) throw new Error();
 
-    const accessToken = await this.getAccessToken(
+    const token = await this.getToken(
       req.header('Authorization')?.split('Bearer ')[1],
       req.user,
     );
-    if (!accessToken) throw new Error();
+    // TODO: FIX ME
+    if (!token) throw new Error();
 
     const data = await fetch(
       'http://localhost:8080/ocs/v1.php/cloud/users/' + req.user.externalID,
-      { headers: { Authorization: 'Bearer ' + accessToken } },
+      { headers: { Authorization: 'Bearer ' + token.access_token } },
     );
 
     // TODO: handle no user
@@ -62,7 +66,10 @@ export class AuthInterceptor implements NestInterceptor {
     if (status !== 'ok') throw new Error();
     if (!externalUser) throw new Error();
 
-    // TODO: update user
+    req.user = await this.usersService.syncNextcloud(req.user, {
+      ...externalUser,
+      token: JSON.stringify(token),
+    });
 
     return next.handle();
   }

@@ -12,15 +12,3 @@ export class AuthGuard implements CanActivate {
     return req.user ? true : false;
   }
 }
-
-// function shouldUpdateUser(
-//   user: User,
-//   externalUser: NextcloudUser['ocs']['data'],
-// ) {
-//   if (
-//     externalUser.displayname !== user.fullName ||
-//     externalUser.id !== user.externalID ||
-//     externalUser.phone !== user.phoneNumber
-//   ) {
-//   }
-// }

@@ -64,16 +64,21 @@ export class AuthController {
       if (!externalUser) return false;
 
       const user = await this.usersService.findOne({ where: { externalID } });
-
-      await this.usersService.create({
-        ...user,
-        externalID,
-        fullName: externalUser.displayname,
-        phoneNumber: externalUser.phone || undefined,
-        // TODO: Use correct data
-        isAdmin: false,
-        token: JSON.stringify(token),
-      });
+      if (!user) {
+        await this.usersService.create({
+          externalID,
+          fullName: externalUser.displayname,
+          phoneNumber: externalUser.phone || undefined,
+          // TODO: Use correct data
+          isAdmin: false,
+          token: JSON.stringify(token),
+        });
+      } else {
+        await this.usersService.syncNextcloud(user, {
+          ...externalUser,
+          token: JSON.stringify(token),
+        });
+      }
 
       // TODO: FIX ME
       return res.send('Logged in');
