@@ -74,7 +74,7 @@ export class AuthController {
           token: JSON.stringify(token),
         });
       } else {
-        await this.usersService.syncNextcloud(user, {
+        await this.authService.syncNextcloud(user, {
           ...externalUser,
           token: JSON.stringify(token),
         });

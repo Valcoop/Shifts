@@ -9,16 +9,12 @@ import { Request } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
 import { User } from '../users/users.entity';
-import { UsersService } from '../users/users.service';
 import { NextcloudUser } from './auth.controller';
 import { AuthService } from './auth.service';
 
 @Injectable()
 export class AuthInterceptor implements NestInterceptor {
-  constructor(
-    private usersService: UsersService,
-    private authService: AuthService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   private async getToken(accessToken: string | undefined, user: User) {
     if (!accessToken || !user.token) return undefined;
@@ -66,7 +62,7 @@ export class AuthInterceptor implements NestInterceptor {
     if (status !== 'ok') throw new Error();
     if (!externalUser) throw new Error();
 
-    req.user = await this.usersService.syncNextcloud(req.user, {
+    req.user = await this.authService.syncNextcloud(req.user, {
       ...externalUser,
       token: JSON.stringify(token),
     });

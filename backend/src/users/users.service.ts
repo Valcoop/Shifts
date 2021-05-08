@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOneOptions, Repository } from 'typeorm';
 import { buildPaginator } from 'typeorm-cursor-pagination';
-import { NextcloudUser } from '../auth/auth.controller';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { User } from './users.entity';
 
-interface UserDAO {
+export interface UserDAO {
   externalID: string;
   fullName: string;
   phoneNumber?: string;
@@ -73,32 +72,5 @@ export class UsersService {
     });
 
     return nextPaginator.paginate(queryBuilder);
-  }
-
-  syncNextcloud(
-    user: User,
-    externalUser: NextcloudUser['ocs']['data'] & { token: string },
-  ): Promise<User> | User {
-    const toUpdateFields: Partial<UserDAO> = {};
-
-    if (externalUser.displayname !== user.fullName) {
-      toUpdateFields.fullName = externalUser.displayname;
-    }
-    if (externalUser.id !== user.externalID) {
-      toUpdateFields.externalID = externalUser.id;
-    }
-    if (externalUser.phone !== user.phoneNumber) {
-      toUpdateFields.phoneNumber = externalUser.phone;
-    }
-    if (externalUser.token !== user.token) {
-      toUpdateFields.token = externalUser.token;
-    }
-    //TODO: handle isAdmin
-
-    return Object.keys(toUpdateFields).length
-      ? this.userRepository.save(
-          this.userRepository.create({ ...user, ...toUpdateFields }),
-        )
-      : user;
   }
 }
