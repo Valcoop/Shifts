@@ -36,6 +36,7 @@ export class AuthController {
     );
   }
 
+  // TODO: HANDLE COOKIES
   @Get('redirect')
   async redirect(@Query() req: { code?: string }, @Res() res: Response) {
     try {

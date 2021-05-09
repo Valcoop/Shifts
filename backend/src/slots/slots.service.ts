@@ -50,10 +50,10 @@ export class SlotsService {
         startDate,
         endDate,
       })
-      .where('userSlot.isDeleted = FALSE')
-      .where('userSlot.userSlotAbsenceID IS NULL');
+      .andWhere('userSlot.isDeleted = FALSE')
+      .andWhere('userSlot.userSlotAbsenceID IS NULL');
 
-    if (active != null) queryBuilder.where('active = :active', { active });
+    if (active != null) queryBuilder.andWhere('active = :active', { active });
     const slots = await queryBuilder.getMany();
 
     return isFull
