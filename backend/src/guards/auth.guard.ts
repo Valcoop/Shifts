@@ -29,7 +29,6 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  // TODO: HANDLE COOKIES
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const { req, res } = GqlExecutionContext.create(context).getContext() as {
       req: Request & { user?: User };
@@ -40,7 +39,11 @@ export class AuthGuard implements CanActivate {
     const accessToken = req.cookies['access_token'];
     const token = await this.getToken(accessToken, req.user);
     // TODO: FIX ME
-    if (!token) return false;
+    if (!token) {
+      res.clearCookie('user_id');
+      res.clearCookie('access_token');
+      return false;
+    }
 
     const data = await fetch(
       'http://localhost:8080/ocs/v1.php/cloud/users/' + req.user.externalID,
@@ -54,9 +57,21 @@ export class AuthGuard implements CanActivate {
       },
     } = parser.parse(await data.text()) as NextcloudUser;
     // TODO: FIX ME
-    if (status !== 'ok') return false;
-    if (!externalUser) return false;
-    if (externalUser.id !== req.user.externalID) return false;
+    if (status !== 'ok') {
+      res.clearCookie('user_id');
+      res.clearCookie('access_token');
+      return false;
+    }
+    if (!externalUser) {
+      res.clearCookie('user_id');
+      res.clearCookie('access_token');
+      return false;
+    }
+    if (externalUser.id !== req.user.externalID) {
+      res.clearCookie('user_id');
+      res.clearCookie('access_token');
+      return false;
+    }
 
     req.user = await this.authService.syncNextcloud(req.user, {
       ...externalUser,

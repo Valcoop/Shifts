@@ -7,11 +7,13 @@ import { UsersService } from './users/users.service';
 export default class LoginMiddleware implements NestMiddleware {
   constructor(private usersService: UsersService) {}
 
-  async use(req: Request & { user?: User }, __: Response, next: NextFunction) {
+  async use(req: Request & { user?: User }, res: Response, next: NextFunction) {
     const userID = req.cookies['user_id'];
     const user = userID
       ? await this.usersService.findOne({ where: { id: userID } })
       : undefined;
+
+    if (!user && userID) res.clearCookie('user_id');
 
     req.user = user;
 

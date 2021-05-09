@@ -36,7 +36,6 @@ export class AuthController {
     );
   }
 
-  // TODO: HANDLE COOKIES
   @Get('redirect')
   async redirect(@Query() req: { code?: string }, @Res() res: Response) {
     try {
@@ -67,7 +66,7 @@ export class AuthController {
 
       const user = await this.usersService.findOne({ where: { externalID } });
       if (!user) {
-        await this.usersService.create({
+        const newUser = await this.usersService.create({
           externalID,
           fullName: externalUser.displayname,
           phoneNumber: externalUser.phone || undefined,
@@ -76,18 +75,25 @@ export class AuthController {
           ),
           token: JSON.stringify(token),
         });
+
+        res.cookie('user_id', newUser.id, {
+          httpOnly: true,
+          maxAge: 3600000,
+          sameSite: 'strict',
+        });
       } else {
         await this.authService.syncNextcloud(user, {
           ...externalUser,
           token: JSON.stringify(token),
         });
+
+        res.cookie('user_id', user.id, {
+          httpOnly: true,
+          maxAge: 3600000,
+          sameSite: 'strict',
+        });
       }
 
-      res.cookie('user_id', user?.id, {
-        httpOnly: true,
-        maxAge: 3600000,
-        sameSite: 'strict',
-      });
       res.cookie('access_token', token.token.access_token, {
         httpOnly: true,
         maxAge: 3600000,
