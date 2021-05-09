@@ -49,7 +49,6 @@ export interface SlotsInput {
 }
 
 export interface BookSlotInput {
-    userID: string;
     slotID: string;
     fullName: string;
     phoneNumber: string;

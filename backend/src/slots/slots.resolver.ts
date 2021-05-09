@@ -8,6 +8,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { Roles } from '../decorator/roles.decorator';
+import { CurrentUser } from '../decorator/user.decorator';
 import {
   AddSlotInput,
   BookSlotInput,
@@ -23,7 +24,7 @@ import { Job } from '../jobs/jobs.entity';
 import { JobsService } from '../jobs/jobs.service';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { UserSlotsService } from '../user-slots/user-slots.service';
-import { UsersService } from '../users/users.service';
+import { User } from '../users/users.entity';
 import { btoa } from '../utils';
 import { Slot } from './slots.entity';
 import { SlotsService } from './slots.service';
@@ -33,7 +34,6 @@ export class SlotsResolver {
   constructor(
     private slotsService: SlotsService,
     private jobsService: JobsService,
-    private usersService: UsersService,
     private userSlotsService: UserSlotsService,
   ) {}
 
@@ -45,16 +45,12 @@ export class SlotsResolver {
   @Mutation()
   @UseGuards(AuthGuard)
   async bookSlot(
-    @Args('input') { userID, slotID, fullName, phoneNumber }: BookSlotInput,
+    @CurrentUser() user: User,
+    @Args('input') { slotID, fullName, phoneNumber }: BookSlotInput,
   ): Promise<{ userSlot: UserSlot }> {
-    const [slot, user] = await Promise.all([
-      this.slotsService.findByID(Number(slotID)),
-      this.usersService.findByID(Number(userID)),
-    ]);
+    const slot = await this.slotsService.findByID(Number(slotID));
     // TODO: FIX ME
     if (!slot || !slot.active || slot.isDeleted) throw new Error();
-    // TODO: FIX ME
-    if (!user) throw new Error();
 
     return {
       userSlot: await this.userSlotsService.save({
@@ -72,6 +68,7 @@ export class SlotsResolver {
   @Mutation()
   @UseGuards(AuthGuard)
   async cancelBookedSlot(
+    @CurrentUser() user: User,
     @Args('input')
     { userSlotID, absenceTypeID, description }: CancelBookedSlotInput,
   ): Promise<{ userSlot: UserSlot }> {
@@ -80,6 +77,8 @@ export class SlotsResolver {
     if (!userSlot) throw new Error();
     // TODO: FIX ME
     if (userSlot.userSlotAbsenceID) throw new Error();
+    // TODO: FIX ME
+    if (userSlot.userID !== user.id) throw new Error();
 
     return {
       userSlot: await this.userSlotsService.cancel(userSlot, {

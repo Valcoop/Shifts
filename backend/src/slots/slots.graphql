@@ -18,7 +18,6 @@ type Mutation {
 }
 
 input BookSlotInput {
-  userID: String!
   slotID: ID!
   fullName: String!
   phoneNumber: String!
