@@ -29,6 +29,7 @@ export class AuthGuard implements CanActivate {
     }
   }
 
+  // TODO: HANDLE COOKIES
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const { req } = GqlExecutionContext.create(context).getContext() as {
       req: Request & { user?: User };
@@ -47,14 +48,13 @@ export class AuthGuard implements CanActivate {
       { headers: { Authorization: 'Bearer ' + token.access_token } },
     );
 
-    // TODO: handle no user
     const {
       ocs: {
         data: externalUser,
         meta: { status },
       },
     } = parser.parse(await data.text()) as NextcloudUser;
-    // TODO: handle error
+    // TODO: FIX ME
     if (status !== 'ok') return false;
     if (!externalUser) return false;
     if (externalUser.id !== req.user.externalID) return false;

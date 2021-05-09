@@ -12,7 +12,7 @@ export class RolesGuard implements CanActivate {
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!roles) return true;
 
-    // TODO: Currently, only admin role is handle with thhe isAdmin field in user entity
+    // TODO: Currently, only admin role is handle with the isAdmin field in user entity
     if (roles.length !== 1 && roles[0] !== 'admin') throw new Error();
 
     const { req } = GqlExecutionContext.create(context).getContext() as {

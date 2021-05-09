@@ -92,6 +92,7 @@ export class SlotsResolver {
   @UseGuards(AuthGuard)
   @Roles('admin')
   async addSlot(
+    @CurrentUser() user: User,
     @Args('input')
     { active, duration, jobID, startDate, totalPlace }: AddSlotInput,
   ): Promise<{ slot: Slot }> {
@@ -102,10 +103,8 @@ export class SlotsResolver {
     return {
       slot: await this.slotsService.save({
         active,
-        // TODO: Change me
-        userAdminCreated: 1,
-        // TODO: Change me
-        lastUserAdminUpdated: 1,
+        userAdminCreated: user.id,
+        lastUserAdminUpdated: user.id,
         startDate,
         duration,
         job,
@@ -132,6 +131,7 @@ export class SlotsResolver {
   @UseGuards(AuthGuard)
   @Roles('admin')
   async updateSlot(
+    @CurrentUser() user: User,
     @Args('input')
     { slotID, active, duration, jobID, startDate, totalPlace }: UpdateSlotInput,
   ): Promise<{ slot: Slot }> {
@@ -146,8 +146,7 @@ export class SlotsResolver {
 
     return {
       slot: await this.slotsService.update(slot, {
-        // TODO: Change me
-        lastUserAdminUpdated: 1,
+        lastUserAdminUpdated: user.id,
         ...(active != null ? { active } : {}),
         ...(startDate != null ? { startDate } : {}),
         ...(duration != null ? { duration } : {}),
