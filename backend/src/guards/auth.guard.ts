@@ -5,6 +5,11 @@ import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
 import { NextcloudUser } from '../auth/auth.controller';
 import { AuthService } from '../auth/auth.service';
+import {
+  COOKIE_ACCESS_TOKEN_NAME,
+  COOKIE_USER_ID_NAME,
+  NC_USER_PROVISIONING_URL,
+} from '../constants';
 import { User } from '../users/users.entity';
 
 @Injectable()
@@ -36,17 +41,17 @@ export class AuthGuard implements CanActivate {
     };
     if (!req.user) return false;
 
-    const accessToken = req.cookies['access_token'];
+    const accessToken = req.cookies[COOKIE_ACCESS_TOKEN_NAME];
     const token = await this.getToken(accessToken, req.user);
     // TODO: FIX ME
     if (!token) {
-      res.clearCookie('user_id');
-      res.clearCookie('access_token');
+      res.clearCookie(COOKIE_USER_ID_NAME);
+      res.clearCookie(COOKIE_ACCESS_TOKEN_NAME);
       return false;
     }
 
     const data = await fetch(
-      'http://localhost:8080/ocs/v1.php/cloud/users/' + req.user.externalID,
+      `${process.env.OAUTH_HOST}${NC_USER_PROVISIONING_URL}/${req.user.externalID}`,
       { headers: { Authorization: 'Bearer ' + token.access_token } },
     );
 
@@ -58,18 +63,18 @@ export class AuthGuard implements CanActivate {
     } = parser.parse(await data.text()) as NextcloudUser;
     // TODO: FIX ME
     if (status !== 'ok') {
-      res.clearCookie('user_id');
-      res.clearCookie('access_token');
+      res.clearCookie(COOKIE_USER_ID_NAME);
+      res.clearCookie(COOKIE_ACCESS_TOKEN_NAME);
       return false;
     }
     if (!externalUser) {
-      res.clearCookie('user_id');
-      res.clearCookie('access_token');
+      res.clearCookie(COOKIE_USER_ID_NAME);
+      res.clearCookie(COOKIE_ACCESS_TOKEN_NAME);
       return false;
     }
     if (externalUser.id !== req.user.externalID) {
-      res.clearCookie('user_id');
-      res.clearCookie('access_token');
+      res.clearCookie(COOKIE_USER_ID_NAME);
+      res.clearCookie(COOKIE_ACCESS_TOKEN_NAME);
       return false;
     }
 
@@ -79,11 +84,11 @@ export class AuthGuard implements CanActivate {
     });
 
     if (accessToken !== token.access_token) {
-      res.cookie('access_token', token.access_token, {
-        httpOnly: true,
-        maxAge: 3600000,
-        sameSite: 'strict',
-      });
+      this.authService.setCookie(
+        COOKIE_ACCESS_TOKEN_NAME,
+        token.access_token,
+        res,
+      );
     }
 
     return true;

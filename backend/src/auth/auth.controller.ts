@@ -2,7 +2,11 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
-import { PLANNING_GROUP_NAME } from '../constants';
+import {
+  COOKIE_ACCESS_TOKEN_NAME,
+  COOKIE_USER_ID_NAME,
+  PLANNING_GROUP_NAME,
+} from '../constants';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
@@ -76,29 +80,29 @@ export class AuthController {
           token: JSON.stringify(token),
         });
 
-        res.cookie('user_id', newUser.id, {
-          httpOnly: true,
-          maxAge: 3600000,
-          sameSite: 'strict',
-        });
+        this.authService.setCookie(
+          COOKIE_USER_ID_NAME,
+          newUser.id.toString(),
+          res,
+        );
       } else {
         await this.authService.syncNextcloud(user, {
           ...externalUser,
           token: JSON.stringify(token),
         });
 
-        res.cookie('user_id', user.id, {
-          httpOnly: true,
-          maxAge: 3600000,
-          sameSite: 'strict',
-        });
+        this.authService.setCookie(
+          COOKIE_USER_ID_NAME,
+          user.id.toString(),
+          res,
+        );
       }
 
-      res.cookie('access_token', token.token.access_token, {
-        httpOnly: true,
-        maxAge: 3600000,
-        sameSite: 'strict',
-      });
+      this.authService.setCookie(
+        COOKIE_ACCESS_TOKEN_NAME,
+        token.token.access_token,
+        res,
+      );
 
       // TODO: FIX ME
       return res.send('Logged in');

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Response } from 'express';
 import { AuthorizationCode } from 'simple-oauth2';
 import { Repository } from 'typeorm';
 import {
@@ -42,6 +43,14 @@ export class AuthService {
 
   getClient() {
     return this.client;
+  }
+
+  setCookie(name: string, value: string, res: Response) {
+    res.cookie(name, value, {
+      httpOnly: true,
+      maxAge: 3600000,
+      sameSite: 'strict',
+    });
   }
 
   syncNextcloud(
