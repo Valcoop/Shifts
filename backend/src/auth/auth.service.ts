@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthorizationCode } from 'simple-oauth2';
 import { Repository } from 'typeorm';
-import { OAUTH_AUTHORIZE_PATH, OAUTH_TOKEN_PATH } from '../constants';
+import {
+  OAUTH_AUTHORIZE_PATH,
+  OAUTH_TOKEN_PATH,
+  PLANNING_GROUP_NAME,
+} from '../constants';
 import { User } from '../users/users.entity';
 import { UserDAO } from '../users/users.service';
 import { NextcloudUser } from './auth.controller';
@@ -58,7 +62,20 @@ export class AuthService {
     if (externalUser.token !== user.token) {
       toUpdateFields.token = externalUser.token;
     }
-    //TODO: handle isAdmin
+    if (
+      user.isAdmin &&
+      !externalUser.groups.some(
+        ({ element }) => element === PLANNING_GROUP_NAME,
+      )
+    ) {
+      toUpdateFields.isAdmin = false;
+    }
+    if (
+      !user.isAdmin &&
+      externalUser.groups.some(({ element }) => element === PLANNING_GROUP_NAME)
+    ) {
+      toUpdateFields.isAdmin = true;
+    }
 
     return Object.keys(toUpdateFields).length
       ? this.userRepository.save(

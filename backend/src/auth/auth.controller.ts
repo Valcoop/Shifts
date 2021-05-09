@@ -2,6 +2,7 @@ import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
+import { PLANNING_GROUP_NAME } from '../constants';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
@@ -61,7 +62,7 @@ export class AuthController {
       // TODO: FIX ME
       if (status !== 'ok') throw new Error();
       // TODO: FIX ME
-      if (!externalUser) return false;
+      if (!externalUser) throw new Error();
 
       const user = await this.usersService.findOne({ where: { externalID } });
       if (!user) {
@@ -69,8 +70,9 @@ export class AuthController {
           externalID,
           fullName: externalUser.displayname,
           phoneNumber: externalUser.phone || undefined,
-          // TODO: Use correct data
-          isAdmin: false,
+          isAdmin: externalUser.groups.some(
+            ({ element }) => element === PLANNING_GROUP_NAME,
+          ),
           token: JSON.stringify(token),
         });
       } else {
