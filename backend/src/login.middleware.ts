@@ -8,9 +8,9 @@ export default class LoginMiddleware implements NestMiddleware {
   constructor(private usersService: UsersService) {}
 
   async use(req: Request & { user?: User }, __: Response, next: NextFunction) {
-    const userID = req.header('X-user-id');
+    const userID = req.cookies['user_id'];
     const user = userID
-      ? await this.usersService.findOne({ where: { externalID: userID } })
+      ? await this.usersService.findOne({ where: { id: userID } })
       : undefined;
 
     req.user = user;

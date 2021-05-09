@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import parser from 'fast-xml-parser';
 import fetch from 'node-fetch';
 import { NextcloudUser } from '../auth/auth.controller';
@@ -31,15 +31,14 @@ export class AuthGuard implements CanActivate {
 
   // TODO: HANDLE COOKIES
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const { req } = GqlExecutionContext.create(context).getContext() as {
+    const { req, res } = GqlExecutionContext.create(context).getContext() as {
       req: Request & { user?: User };
+      res: Response;
     };
     if (!req.user) return false;
 
-    const token = await this.getToken(
-      req.header('Authorization')?.split('Bearer ')[1],
-      req.user,
-    );
+    const accessToken = req.cookies['access_token'];
+    const token = await this.getToken(accessToken, req.user);
     // TODO: FIX ME
     if (!token) return false;
 
@@ -63,6 +62,14 @@ export class AuthGuard implements CanActivate {
       ...externalUser,
       token: JSON.stringify(token),
     });
+
+    if (accessToken !== token.access_token) {
+      res.cookie('access_token', token.access_token, {
+        httpOnly: true,
+        maxAge: 3600000,
+        sameSite: 'strict',
+      });
+    }
 
     return true;
   }

@@ -83,6 +83,17 @@ export class AuthController {
         });
       }
 
+      res.cookie('user_id', user?.id, {
+        httpOnly: true,
+        maxAge: 3600000,
+        sameSite: 'strict',
+      });
+      res.cookie('access_token', token.token.access_token, {
+        httpOnly: true,
+        maxAge: 3600000,
+        sameSite: 'strict',
+      });
+
       // TODO: FIX ME
       return res.send('Logged in');
     } catch (error) {
