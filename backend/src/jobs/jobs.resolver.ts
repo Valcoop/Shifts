@@ -1,4 +1,4 @@
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Roles } from '../decorator/roles.decorator';
 import {
@@ -9,7 +9,6 @@ import {
 } from '../graphql';
 import { JobConnection } from '../graphql-types';
 import { AuthGuard } from '../guards/auth.guard';
-import { TokenInterceptor } from '../interceptors/token.interceptor';
 import { btoa } from '../utils';
 import { Job } from './jobs.entity';
 import { JobsService } from './jobs.service';
@@ -41,7 +40,6 @@ export class JobsResolver {
   }
 
   @Mutation()
-  @UseInterceptors(TokenInterceptor)
   async addJob(
     @Args('input') { color, name }: AddJobInput,
   ): Promise<{ job: Job }> {
@@ -51,7 +49,6 @@ export class JobsResolver {
   }
 
   @Mutation()
-  @UseInterceptors(TokenInterceptor)
   async removeJob(
     @Args('input') { jobID }: RemoveJobInput,
   ): Promise<{ job: Job }> {
@@ -63,7 +60,6 @@ export class JobsResolver {
   }
 
   @Mutation()
-  @UseInterceptors(TokenInterceptor)
   async updateJob(
     @Args('input') { jobID, color, name }: UpdateJobInput,
   ): Promise<{ job: Job }> {

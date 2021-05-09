@@ -1,4 +1,4 @@
-import { UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -19,7 +19,6 @@ import {
 } from '../graphql';
 import { UserSlotConnection } from '../graphql-types';
 import { AuthGuard } from '../guards/auth.guard';
-import { TokenInterceptor } from '../interceptors/token.interceptor';
 import { Job } from '../jobs/jobs.entity';
 import { JobsService } from '../jobs/jobs.service';
 import { UserSlot } from '../user-slots/user-slots.entity';
@@ -45,7 +44,6 @@ export class SlotsResolver {
 
   @Mutation()
   @UseGuards(AuthGuard)
-  @UseInterceptors(TokenInterceptor)
   async bookSlot(
     @Args('input') { userID, slotID, fullName, phoneNumber }: BookSlotInput,
   ): Promise<{ userSlot: UserSlot }> {
@@ -73,7 +71,6 @@ export class SlotsResolver {
 
   @Mutation()
   @UseGuards(AuthGuard)
-  @UseInterceptors(TokenInterceptor)
   async cancelBookedSlot(
     @Args('input')
     { userSlotID, absenceTypeID, description }: CancelBookedSlotInput,
@@ -95,7 +92,6 @@ export class SlotsResolver {
   @Mutation()
   @UseGuards(AuthGuard)
   @Roles('admin')
-  @UseInterceptors(TokenInterceptor)
   async addSlot(
     @Args('input')
     { active, duration, jobID, startDate, totalPlace }: AddSlotInput,
@@ -123,7 +119,6 @@ export class SlotsResolver {
   @Mutation()
   @UseGuards(AuthGuard)
   @Roles('admin')
-  @UseInterceptors(TokenInterceptor)
   async removeSlot(
     @Args('input') { slotID }: RemoveSlotInput,
   ): Promise<{ slot: Slot }> {
@@ -137,7 +132,6 @@ export class SlotsResolver {
   @Mutation()
   @UseGuards(AuthGuard)
   @Roles('admin')
-  @UseInterceptors(TokenInterceptor)
   async updateSlot(
     @Args('input')
     { slotID, active, duration, jobID, startDate, totalPlace }: UpdateSlotInput,
