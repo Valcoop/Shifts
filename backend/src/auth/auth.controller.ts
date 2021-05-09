@@ -12,7 +12,7 @@ export interface NextcloudUser {
       id: string;
       displayname: string;
       phone?: string;
-      groups: { element: string }[];
+      groups: { element: string | string[] };
     };
     meta: { status: string };
   };
@@ -71,8 +71,8 @@ export class AuthController {
           externalID,
           fullName: externalUser.displayname,
           phoneNumber: externalUser.phone || undefined,
-          isAdmin: externalUser.groups.some(
-            ({ element }) => element === PLANNING_GROUP_NAME,
+          isAdmin: [...externalUser.groups.element].includes(
+            PLANNING_GROUP_NAME,
           ),
           token: JSON.stringify(token),
         });

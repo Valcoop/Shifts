@@ -64,15 +64,13 @@ export class AuthService {
     }
     if (
       user.isAdmin &&
-      !externalUser.groups.some(
-        ({ element }) => element === PLANNING_GROUP_NAME,
-      )
+      ![...externalUser.groups.element].includes(PLANNING_GROUP_NAME)
     ) {
       toUpdateFields.isAdmin = false;
     }
     if (
       !user.isAdmin &&
-      externalUser.groups.some(({ element }) => element === PLANNING_GROUP_NAME)
+      [...externalUser.groups.element].includes(PLANNING_GROUP_NAME)
     ) {
       toUpdateFields.isAdmin = true;
     }
