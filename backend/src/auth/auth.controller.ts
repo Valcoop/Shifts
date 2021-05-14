@@ -53,7 +53,7 @@ export class AuthController {
 
       const externalID = token.token.user_id;
       const data = await fetch(
-        'http://localhost:8080/ocs/v1.php/cloud/users/' + externalID,
+        `${process.env.OAUTH_HOST}/ocs/v1.php/cloud/users/${externalID}`,
         { headers: { Authorization: 'Bearer ' + token.token.access_token } },
       );
 

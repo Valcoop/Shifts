@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AbsenceTypesModule } from './absence-types/absence-types.module';
 import { AuthModule } from './auth/auth.module';
+import { CORS_OPTION } from './constants';
 import { RolesGuard } from './guards/roles.guard';
 import { JobsModule } from './jobs/jobs.module';
 import LoginMiddleware from './login.middleware';
@@ -23,6 +24,8 @@ import { UsersModule } from './users/users.module';
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       definitions: { path: join(process.cwd(), 'src/graphql.ts') },
+      // TODO: FIX ME
+      cors: CORS_OPTION,
       context: ({ req, res }) => ({ req, res }),
     }),
     TypeOrmModule.forRoot({
