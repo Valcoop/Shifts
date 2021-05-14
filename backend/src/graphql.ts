@@ -245,6 +245,7 @@ export interface UserEdge {
 export interface User {
     id: string;
     fullName: string;
+    isAdmin?: boolean;
     phoneNumber?: string;
     userSlots: UserSlotConnection;
 }
