@@ -1,6 +1,9 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { CurrentUser } from '../decorator/user.decorator';
 import { UserUserSlotsInput } from '../graphql';
 import { UserSlotConnection } from '../graphql-types';
+import { AuthGuard } from '../guards/auth.guard';
 import { btoa } from '../utils';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
@@ -10,10 +13,8 @@ export class UsersResolver {
   constructor(private userService: UsersService) {}
 
   @Query()
-  async user(@Args('userID') userID: string): Promise<User> {
-    const user = await this.userService.findByID(Number(userID));
-    if (!user) throw new Error();
-
+  @UseGuards(AuthGuard)
+  async currentUser(@CurrentUser() user: User): Promise<User> {
     return user;
   }
 

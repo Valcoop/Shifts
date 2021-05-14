@@ -1,5 +1,5 @@
 type Query {
-  user(userID: ID!): User!
+  currentUser: User!
 }
 
 type UserConnection {

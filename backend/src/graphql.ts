@@ -102,7 +102,7 @@ export interface IQuery {
     absenceTypes(input?: AbsenceTypesInput): AbsenceTypeConnection | Promise<AbsenceTypeConnection>;
     jobs(input?: JobsInput): JobConnection | Promise<JobConnection>;
     slots(input: SlotsInput): Slot[] | Promise<Slot[]>;
-    user(userID: string): User | Promise<User>;
+    currentUser(): User | Promise<User>;
 }
 
 export interface IMutation {
