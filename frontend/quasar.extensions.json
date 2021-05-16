@@ -1,6 +1,4 @@
 {
   "@quasar/qcalendar": {},
-  "@quasar/apollo": {
-    "graphql_uri": "http://localhost:3000/graphql"
-  }
+  "@quasar/apollo": {}
 }

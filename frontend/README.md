@@ -9,7 +9,7 @@ npm install
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 ```bash
-quasar dev
+GRAPHQL_URI=http://localhost:3000/graphql quasar dev
 ```
 
 ### Lint the files

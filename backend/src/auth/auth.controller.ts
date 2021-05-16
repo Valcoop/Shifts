@@ -106,7 +106,7 @@ export class AuthController {
       );
 
       // TODO: FIX ME
-      return res.send('Logged in');
+      return res.redirect(`${process.env.APP_HOST}`);
     } catch (error) {
       // TODO: FIX ME
       console.error('Access Token Error', error.message);

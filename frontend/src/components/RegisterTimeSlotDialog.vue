@@ -66,14 +66,8 @@ export default {
   apollo: {
     user: {
       query: USER_QUERY,
-      // Parameters
-      variables () {
-        return {
-          userID: this.userID
-        }
-      },
       update: data => {
-        return { fullName: data.user.lastname + ' ' + data.user.firstname, phoneNumber: data.user.phoneNumber }
+        return { fullName: data.currentUser.fullName, phoneNumber: data.currentUser.phoneNumber }
       }
     }
   },
@@ -110,7 +104,6 @@ export default {
           mutation: BOOK_SLOT_MUTATION,
           // Parameters
           variables: {
-            userID: String(this.userID),
             slotID: this.id,
             fullName: this.user.fullName,
             phoneNumber: this.user.phoneNumber

@@ -3,6 +3,7 @@
     <q-header elevated>
       <q-toolbar>
         <q-btn
+          v-if="error === null"
           flat
           dense
           round
@@ -18,6 +19,7 @@
     </q-header>
 
     <q-drawer
+      v-if="error === null"
       v-model="leftDrawerOpen"
       show-if-above
       bordered
@@ -40,7 +42,7 @@
             <q-item-label>Planning</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item v-if="isAdmin=='1'" to="/admin" active-class="q-item-no-link-highlighting">
+        <q-item v-if="isAdmin==true" to="/admin" active-class="q-item-no-link-highlighting">
           <q-item-section avatar>
             <q-icon name="fas fa-tools"/>
           </q-item-section>
@@ -50,27 +52,43 @@
         </q-item>
       </q-list>
     </q-drawer>
-
     <q-page-container>
-      <router-view />
+      <router-view v-if="error === null"/>
+      <div v-else class="text-center vertical-middle">
+        <h1>Bienvenue sur le Planning Valcoop</h1>
+        <q-btn class="glossy" rounded color="primary" label="Se connecter" size="xl" @click="login()"/>
+      </div>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
+import { USER_QUERY } from './../apollo/graphql'
+
 export default {
   name: 'MainLayout',
   data () {
     return {
       leftDrawerOpen: false,
-      isAdmin: this.$q.cookies.get('isAdmin')
+      error: null
     }
   },
-  mounted () {
-    this.$q.cookies.set('userId', 1, { path: '/' })
-    this.$q.cookies.set('isAdmin', 1, { path: '/' })
-    // this.$q.cookies.set('userId', 2, { path: '/' })
-    // this.$q.cookies.set('isAdmin', 0, { path: '/' })
+  apollo: {
+    isAdmin: {
+      query: USER_QUERY,
+      fetchPolicy: 'cache-and-network',
+      error (error) {
+        this.error = JSON.stringify(error.message)
+      },
+      update: data => {
+        return data.currentUser.isAdmin
+      }
+    }
+  },
+  methods: {
+    login () {
+      window.location.href = 'http://localhost:3000/auth/login'
+    }
   }
 }
 </script>

@@ -79,8 +79,8 @@ export const ADD_JOB_MUTATION = gql`mutation ($name: String!, $color: String!) {
     }
   }`
 
-export const BOOK_SLOT_MUTATION = gql`mutation ($userID: String!, $slotID: ID!, $fullName: String!, $phoneNumber: String!) {
-    bookSlot(input: { userID: $userID, slotID: $slotID, fullName: $fullName, phoneNumber: $phoneNumber }) {
+export const BOOK_SLOT_MUTATION = gql`mutation ($slotID: ID!, $fullName: String!, $phoneNumber: String!) {
+    bookSlot(input: { slotID: $slotID, fullName: $fullName, phoneNumber: $phoneNumber }) {
       userSlot {
         id
       }
@@ -182,12 +182,12 @@ export const ACTIVE_PARAM_SLOTS_QUERY = gql`query ($startDate: Date!, $endDate: 
     }
   }`
 
-export const USER_QUERY = gql`query ($userID: ID!, $startDate: Date) {
-    user(userID: $userID) {
+export const USER_QUERY = gql`query ($startDate: Date) {
+    currentUser {
       id
-      firstname
-      lastname
+      fullName
       phoneNumber
+      isAdmin
       userSlots(input: {first:20, startDate: $startDate}) {
         edges {
           node {

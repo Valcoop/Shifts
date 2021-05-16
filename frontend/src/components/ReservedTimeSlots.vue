@@ -110,16 +110,15 @@ export default {
         // Parameters
         variables () {
           return {
-            userID: this.$q.cookies.get('userId'),
             startDate: new Date()
           }
         },
         fetchPolicy: 'cache-and-network',
       update: data => {
         const reservedtimeSlots = []
-        const userID = data.user.id
-        for (let keySlot in data.user.userSlots.edges){
-          const edge = data.user.userSlots.edges[keySlot]
+        const userID = data.currentUser.id
+        for (let keySlot in data.currentUser.userSlots.edges){
+          const edge = data.currentUser.userSlots.edges[keySlot]
           const options = {
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', second: '2-digit',
