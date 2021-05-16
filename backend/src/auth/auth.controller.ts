@@ -74,9 +74,10 @@ export class AuthController {
           externalID,
           fullName: externalUser.displayname,
           phoneNumber: externalUser.phone || undefined,
-          isAdmin: [...externalUser.groups.element].includes(
-            PLANNING_GROUP_NAME,
-          ),
+          isAdmin: (Array.isArray(externalUser.groups.element)
+            ? externalUser.groups.element
+            : [externalUser.groups.element]
+          ).includes(PLANNING_GROUP_NAME),
           token: JSON.stringify(token),
         });
 

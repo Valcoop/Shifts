@@ -73,13 +73,19 @@ export class AuthService {
     }
     if (
       user.isAdmin &&
-      ![...externalUser.groups.element].includes(PLANNING_GROUP_NAME)
+      !(Array.isArray(externalUser.groups.element)
+        ? externalUser.groups.element
+        : [externalUser.groups.element]
+      ).includes(PLANNING_GROUP_NAME)
     ) {
       toUpdateFields.isAdmin = false;
     }
     if (
       !user.isAdmin &&
-      [...externalUser.groups.element].includes(PLANNING_GROUP_NAME)
+      (Array.isArray(externalUser.groups.element)
+        ? externalUser.groups.element
+        : [externalUser.groups.element]
+      ).includes(PLANNING_GROUP_NAME)
     ) {
       toUpdateFields.isAdmin = true;
     }
