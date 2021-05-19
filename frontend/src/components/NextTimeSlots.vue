@@ -57,7 +57,6 @@ export default {
   data () {
     return {
       slide: 1,
-      userID: this.$q.cookies.get('userId'),
       tab: 'horaires',
       monthFormatter: this.monthFormatterFunc(),
       dayFormatter: this.dayFormatterFunc(),
@@ -201,7 +200,6 @@ export default {
           // (everything except "component" and "parent" props above):
           // apiResponse: this.resp
           id: row.id,
-          userID: this.userID,
           title: row.title,
           weekday: this.weekdayFormatter(timestamp, false),
           day: this.dayFormatter(timestamp, false),

@@ -12,8 +12,8 @@
             <q-btn color="primary" label="Ajouter" @click="onAddClick" />
           </q-card-actions>
         </q-card-section>
-        <q-separator v-if="timeSlots && timeSlots.length > 0" vertical/>
-        <q-card-section v-if="timeSlots && timeSlots.length > 0">
+        <q-separator v-if="copyTimeSlots && copyTimeSlots.length > 0" vertical/>
+        <q-card-section v-if="copyTimeSlots && copyTimeSlots.length > 0">
           <h6 class="q-ma-xs">Modifier les créneaux existants</h6>
           <template v-for="(slot, index) in copyTimeSlots">
             <div :key="index" class="q-pa-xs">
@@ -117,7 +117,7 @@ export default {
 
       this.copyTimeSlots = this.copyTimeSlots.filter(
         function (slot) {
-          return slot.slotID !== id
+          return slot.id !== id
         }
       )
 
@@ -129,7 +129,7 @@ export default {
         color: 'green-4',
         textColor: 'white',
         icon: 'cloud_done',
-        message: 'Le créneau a été modifié'
+        message: 'Le créneau a été supprimé'
       })
     },
 

@@ -174,8 +174,7 @@ export default {
       yearFormatter: this.yearFormatterFunc(),
       locale: 'fr',
       events: [],
-      timeSlots: [],
-      userID: this.$q.cookies.get('userId')
+      timeSlots: []
     }
   },
   apollo: {
@@ -394,7 +393,6 @@ export default {
             // (everything except "component" and "parent" props above):
             // apiResponse: this.resp
             id: event.id,
-            userID: this.userID,
             title: event.title,
             weekday: this.weekdayFormatter(timestamp, false),
             day: this.dayFormatter(timestamp, false),

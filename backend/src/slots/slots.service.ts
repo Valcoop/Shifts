@@ -45,16 +45,19 @@ export class SlotsService {
 
     const queryBuilder = await this.slotRepository
       .createQueryBuilder('slot')
-      .leftJoinAndSelect('slot.userSlots', 'userSlot', 'slot.isDeleted = false')
-      .where('slot.startDate BETWEEN :startDate AND :endDate', {
+      .leftJoinAndSelect('slot.userSlots', 'userSlot')
+      .where('slot.isDeleted = false')
+      .andWhere('slot.startDate BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
-      })
-      .andWhere('userSlot.isDeleted = FALSE')
-      .andWhere('userSlot.userSlotAbsenceID IS NULL');
+      });
 
     if (active != null) queryBuilder.andWhere('active = :active', { active });
     const slots = await queryBuilder.getMany();
+
+    slots.forEach(slot => {
+      slot.userSlots = slot.userSlots.filter(userSlot => userSlot.isDeleted !== true && userSlot.userSlotAbsenceID == null)
+    })
 
     return isFull
       ? slots.filter((slot) => slot.userSlots.length >= slot.totalPlace)

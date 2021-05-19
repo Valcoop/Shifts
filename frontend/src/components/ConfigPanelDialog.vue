@@ -208,6 +208,9 @@ export default {
             )
           }
         })
+
+        // Emit Ok
+        this.$emit('ok')
       }
     },
 
@@ -226,6 +229,9 @@ export default {
           }
         })
       }
+
+      // Emit Ok
+      this.$emit('ok')
 
       this.$q.notify({
         color: 'green-4',

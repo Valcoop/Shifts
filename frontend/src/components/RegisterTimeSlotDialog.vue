@@ -44,7 +44,6 @@ import { BOOK_SLOT_MUTATION, USER_QUERY } from './../apollo/graphql'
 export default {
   props: {
     id: String,
-    userID: Number,
     title: String,
     weekday: String,
     day: String,

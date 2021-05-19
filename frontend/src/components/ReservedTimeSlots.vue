@@ -116,7 +116,6 @@ export default {
         fetchPolicy: 'cache-and-network',
       update: data => {
         const reservedtimeSlots = []
-        const userID = data.currentUser.id
         for (let keySlot in data.currentUser.userSlots.edges){
           const edge = data.currentUser.userSlots.edges[keySlot]
           const options = {
