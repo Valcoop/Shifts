@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { CORS_OPTION } from './constants';
 import { RolesGuard } from './guards/roles.guard';
 import { JobsModule } from './jobs/jobs.module';
+import { Logger } from './logger';
 import LoginMiddleware from './login.middleware';
 import { SlotsModule } from './slots/slots.module';
 import { UserSlotsModule } from './user-slots/user-slots.module';
@@ -26,7 +27,13 @@ import { UsersModule } from './users/users.module';
       definitions: { path: join(process.cwd(), 'src/graphql.ts') },
       // TODO: FIX ME
       cors: CORS_OPTION,
-      context: ({ req, res }) => ({ req, res }),
+      context: ({ req, res }) => {
+        req.logger = new Logger();
+
+        if (req.user) req.logger.setData({ userID: req.user.id });
+
+        return { req, res };
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
