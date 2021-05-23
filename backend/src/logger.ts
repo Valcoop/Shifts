@@ -2,7 +2,10 @@ import { Logger as NestLogger } from '@nestjs/common';
 
 export interface LogMeta {
   absenceTypeID?: string | number;
+  jobID?: string | number;
+  slotID?: string | number;
   userID?: string | number;
+  userSlotID?: string | number;
 }
 
 export class Logger extends NestLogger {

@@ -7,6 +7,7 @@ import {
   COOKIE_USER_ID_NAME,
   PLANNING_GROUP_NAME,
 } from '../constants';
+import { Logger } from '../logger';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
@@ -25,11 +26,14 @@ export interface NextcloudUser {
 @Controller('auth')
 export class AuthController {
   private readonly CALLBACK_URL = 'http://localhost:3000/auth/redirect';
+  private logger: Logger;
 
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
-  ) {}
+  ) {
+    this.logger = new Logger('AuthController');
+  }
 
   @Get('/login')
   login(@Res() res: Response) {
@@ -43,8 +47,11 @@ export class AuthController {
   @Get('redirect')
   async redirect(@Query() req: { code?: string }, @Res() res: Response) {
     try {
-      // TODO: FIX ME
-      if (!req.code) throw new Error();
+      if (!req.code) {
+        this.logger.warn(`Missing OAuth2 code`);
+        // TODO: FIX ME
+        throw new Error();
+      }
 
       const token = await this.authService.getClient().getToken({
         code: req.code,
@@ -105,11 +112,9 @@ export class AuthController {
         res,
       );
 
-      // TODO: FIX ME
       return res.redirect(`${process.env.APP_HOST}`);
     } catch (error) {
-      // TODO: FIX ME
-      console.error('Access Token Error', error.message);
+      this.logger.warn(`Access Token Error, ${error.message}`);
       return res.status(500).json('Authentication failed');
     }
   }

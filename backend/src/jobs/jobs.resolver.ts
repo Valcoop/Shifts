@@ -1,5 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ApolloError } from 'apollo-server-express';
+import { CtxLogger } from '../decorator/logger.decorator';
 import { Roles } from '../decorator/roles.decorator';
 import {
   AddJobInput,
@@ -9,6 +11,7 @@ import {
 } from '../graphql';
 import { JobConnection } from '../graphql-types';
 import { AuthGuard } from '../guards/auth.guard';
+import { Logger } from '../logger';
 import { btoa } from '../utils';
 import { Job } from './jobs.entity';
 import { JobsService } from './jobs.service';
@@ -51,10 +54,13 @@ export class JobsResolver {
   @Mutation()
   async removeJob(
     @Args('input') { jobID }: RemoveJobInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ job: Job }> {
     const job = await this.jobsService.findByID(Number(jobID));
-    // TODO: FIX ME
-    if (!job) throw new Error();
+    if (!job) {
+      logger.warn('No such job', JobsResolver.name, { jobID });
+      throw new ApolloError('No such job', 'INVALID_ID');
+    }
 
     return { job: await this.jobsService.delete(job) };
   }
@@ -62,10 +68,13 @@ export class JobsResolver {
   @Mutation()
   async updateJob(
     @Args('input') { jobID, color, name }: UpdateJobInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ job: Job }> {
     const job = await this.jobsService.findByID(Number(jobID));
-    // TODO: FIX ME
-    if (!job) throw new Error();
+    if (!job) {
+      logger.warn('No such job', JobsResolver.name, { jobID });
+      throw new ApolloError('No such job', 'INVALID_ID');
+    }
 
     return {
       job: await this.jobsService.update(job, {

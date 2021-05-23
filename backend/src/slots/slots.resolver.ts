@@ -7,6 +7,8 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { ApolloError } from 'apollo-server-express';
+import { CtxLogger } from '../decorator/logger.decorator';
 import { Roles } from '../decorator/roles.decorator';
 import { CurrentUser } from '../decorator/user.decorator';
 import {
@@ -22,6 +24,7 @@ import { UserSlotConnection } from '../graphql-types';
 import { AuthGuard } from '../guards/auth.guard';
 import { Job } from '../jobs/jobs.entity';
 import { JobsService } from '../jobs/jobs.service';
+import { Logger } from '../logger';
 import { UserSlot } from '../user-slots/user-slots.entity';
 import { UserSlotsService } from '../user-slots/user-slots.service';
 import { User } from '../users/users.entity';
@@ -47,10 +50,15 @@ export class SlotsResolver {
   async bookSlot(
     @CurrentUser() user: User,
     @Args('input') { slotID, fullName, phoneNumber }: BookSlotInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ userSlot: UserSlot }> {
     const slot = await this.slotsService.findByID(Number(slotID));
+    if (!slot) {
+      logger.warn('No such slot', SlotsResolver.name, { slotID });
+      throw new ApolloError('No such slot', 'INVALID_ID');
+    }
     // TODO: FIX ME
-    if (!slot || !slot.active || slot.isDeleted) throw new Error();
+    if (!slot.active || slot.isDeleted) throw new Error();
 
     return {
       userSlot: await this.userSlotsService.save({
@@ -71,10 +79,13 @@ export class SlotsResolver {
     @CurrentUser() user: User,
     @Args('input')
     { userSlotID, absenceTypeID, description }: CancelBookedSlotInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ userSlot: UserSlot }> {
     const userSlot = await this.userSlotsService.findByID(Number(userSlotID));
-    // TODO: FIX ME
-    if (!userSlot) throw new Error();
+    if (!userSlot) {
+      logger.warn('No such userSlot', SlotsResolver.name, { userSlotID });
+      throw new ApolloError('No such userSlot', 'INVALID_ID');
+    }
     // TODO: FIX ME
     if (userSlot.userSlotAbsenceID) throw new Error();
     // TODO: FIX ME
@@ -95,10 +106,13 @@ export class SlotsResolver {
     @CurrentUser() user: User,
     @Args('input')
     { active, duration, jobID, startDate, totalPlace }: AddSlotInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ slot: Slot }> {
     const job = await this.jobsService.findByID(Number(jobID));
-    // TODO: FIX ME
-    if (!job) throw new Error();
+    if (!job) {
+      logger.warn('No such job', SlotsResolver.name, { jobID });
+      throw new ApolloError('No such job', 'INVALID_ID');
+    }
 
     return {
       slot: await this.slotsService.save({
@@ -119,10 +133,13 @@ export class SlotsResolver {
   @Roles('admin')
   async removeSlot(
     @Args('input') { slotID }: RemoveSlotInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ slot: Slot }> {
     const slot = await this.slotsService.findByID(Number(slotID));
-    // TODO: FIX ME
-    if (!slot) throw new Error();
+    if (!slot) {
+      logger.warn('No such slot', SlotsResolver.name, { slotID });
+      throw new ApolloError('No such slot', 'INVALID_ID');
+    }
 
     return { slot: await this.slotsService.delete(slot) };
   }
@@ -134,15 +151,20 @@ export class SlotsResolver {
     @CurrentUser() user: User,
     @Args('input')
     { slotID, active, duration, jobID, startDate, totalPlace }: UpdateSlotInput,
+    @CtxLogger() logger: Logger,
   ): Promise<{ slot: Slot }> {
     const [slot, job] = await Promise.all([
       this.slotsService.findByID(Number(slotID)),
       jobID ? this.jobsService.findByID(Number(jobID)) : undefined,
     ]);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-    // TODO: FIX ME
-    if (jobID && !job) throw new Error();
+    if (!slot) {
+      logger.warn('No such slot', SlotsResolver.name, { slotID });
+      throw new ApolloError('No such slot', 'INVALID_ID');
+    }
+    if (jobID && !job) {
+      logger.warn('No such job', SlotsResolver.name, { jobID });
+      throw new ApolloError('No such job', 'INVALID_ID');
+    }
 
     return {
       slot: await this.slotsService.update(slot, {

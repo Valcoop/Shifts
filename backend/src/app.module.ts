@@ -28,11 +28,10 @@ import { UsersModule } from './users/users.module';
       // TODO: FIX ME
       cors: CORS_OPTION,
       context: ({ req, res }) => {
-        req.logger = new Logger();
+        const logger = new Logger();
+        if (req.user) logger.setData('userID', req.user.id);
 
-        if (req.user) req.logger.setData({ userID: req.user.id });
-
-        return { req, res };
+        return { req: { ...req, logger }, res };
       },
     }),
     TypeOrmModule.forRoot({
