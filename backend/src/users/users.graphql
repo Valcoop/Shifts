@@ -1,5 +1,5 @@
 type Query {
-  user(userID: ID!): User!
+  currentUser: User!
 }
 
 type UserConnection {
@@ -15,13 +15,14 @@ type UserEdge {
 
 type User {
   id: ID!
-  firstname: String!
-  lastname: String!
-  phoneNumber: String!
-  slots(input: UserSlotsInput!): SlotConnection!
+  fullName: String!
+  isAdmin: Boolean
+  phoneNumber: String
+  userSlots(input: UserUserSlotsInput!): UserSlotConnection!
 }
 
-input UserSlotsInput {
+input UserUserSlotsInput {
   first: Int
   after: ID
+  startDate: Date
 }

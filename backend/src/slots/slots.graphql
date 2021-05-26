@@ -1,5 +1,5 @@
 type Query {
-  slots(input: SlotsInput): [Slot!]!
+  slots(input: SlotsInput!): [Slot!]!
 }
 
 input SlotsInput {
@@ -15,18 +15,16 @@ type Mutation {
   addSlot(input: AddSlotInput!): AddSlotPayload!
   removeSlot(input: RemoveSlotInput!): RemoveSlotPayload!
   updateSlot(input: UpdateSlotInput!): UpdateSlotPayload!
-  updateUserSlot(input: UpdateUserSlotInput!): UpdateUserSlotPayload!
 }
 
 input BookSlotInput {
-  userID: String!
   slotID: ID!
   fullName: String!
   phoneNumber: String!
 }
 
 type BookSlotPayload {
-  slot: Slot!
+  userSlot: UserSlot!
 }
 
 input CancelBookedSlotInput {
@@ -36,7 +34,7 @@ input CancelBookedSlotInput {
 }
 
 type CancelBookedSlotPayload {
-  slot: Slot!
+  userSlot: UserSlot!
 }
 
 input AddSlotInput {
@@ -72,56 +70,17 @@ type UpdateSlotPayload {
   slot: Slot!
 }
 
-input UpdateUserSlotInput {
-  userSlotID: ID!
-  fullName: String
-  phoneNumber: String
-}
-
-type UpdateUserSlotPayload {
-  attendee: Attendee!
-}
-
-type SlotConnection {
-  edges: [SlotEdge!]
-  pageInfo: PageInfo
-  totalCount: Int!
-}
-
-type SlotEdge {
-  cursor: ID!
-  node: Slot!
-}
-
 type Slot {
   id: ID!
   startDate: Date!
   duration: Int!
   job: Job!
-  attendees(input: SlotAttendeesInput!): AttendeeConnection!
+  userSlots(input: SlotUserSlotsInput!): UserSlotConnection!
   totalPlace: Int!
   active: Boolean!
 }
 
-type AttendeeConnection {
-  edges: [AttendeeEdge!]
-  pageInfo: PageInfo
-  totalCount: Int!
-}
-
-type AttendeeEdge {
-  cursor: ID!
-  node: Attendee!
-}
-
-type Attendee {
-  userSlotID: ID!
-  userID: String!
-  fullName: String!
-  phoneNumber: String!
-}
-
-input SlotAttendeesInput {
+input SlotUserSlotsInput {
   first: Int
   after: ID
 }

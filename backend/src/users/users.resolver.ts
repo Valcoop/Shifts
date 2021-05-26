@@ -1,6 +1,10 @@
+import { UseGuards } from '@nestjs/common';
 import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { UserSlotsInput } from '../graphql';
-import { SlotConnection } from '../graphql-types';
+import { CurrentUser } from '../decorator/user.decorator';
+import { UserUserSlotsInput } from '../graphql';
+import { UserSlotConnection } from '../graphql-types';
+import { AuthGuard } from '../guards/auth.guard';
+import { btoa } from '../utils';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
 
@@ -9,33 +13,38 @@ export class UsersResolver {
   constructor(private userService: UsersService) {}
 
   @Query()
-  async user(@Args('userID') userID: string): Promise<User> {
-    const user = await this.userService.findOne(userID);
-    if (!user) throw new Error();
-
+  @UseGuards(AuthGuard)
+  async currentUser(@CurrentUser() user: User): Promise<User> {
     return user;
   }
 
   @ResolveField()
-  async slots(
+  async userSlots(
     @Parent() user: User,
-    @Args('input') input: UserSlotsInput,
-  ): Promise<SlotConnection> {
-    const [slots, totalCount] = await this.userService.getUserSlots(
-      user.id,
-      input,
-    );
+    @Args('input') input: UserUserSlotsInput,
+  ): Promise<UserSlotConnection> {
+    const [totalCount, { data: userSlots, cursor }] = await Promise.all([
+      this.userService.countUserSlots(user.id),
+      this.userService.getUserSlots(
+        user.id,
+        { startDate: input.startDate },
+        { first: input.first, after: input.after },
+      ),
+    ]);
 
     return {
       totalCount,
-      edges: slots.map((slot) => ({
-        cursor: slot.id.toString(),
-        node: slot,
+      edges: userSlots.map((userSlot) => ({
+        cursor: btoa(
+          `id:${userSlot.id.toString()},startDate:${userSlot.startDate
+            .getTime()
+            .toString()}`,
+        ),
+        node: userSlot,
       })),
       pageInfo: {
-        // @TODO: fix me
-        hasNextPage: false,
-        endCursor: slots[slots.length - 1]?.id.toString(),
+        hasNextPage: Boolean(cursor.afterCursor),
+        endCursor: cursor.afterCursor ?? undefined,
       },
     };
   }

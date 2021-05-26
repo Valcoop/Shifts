@@ -49,7 +49,6 @@ export interface SlotsInput {
 }
 
 export interface BookSlotInput {
-    userID: string;
     slotID: string;
     fullName: string;
     phoneNumber: string;
@@ -82,27 +81,28 @@ export interface UpdateSlotInput {
     active?: boolean;
 }
 
+export interface SlotUserSlotsInput {
+    first?: number;
+    after?: string;
+}
+
 export interface UpdateUserSlotInput {
     userSlotID: string;
     fullName?: string;
     phoneNumber?: string;
 }
 
-export interface SlotAttendeesInput {
+export interface UserUserSlotsInput {
     first?: number;
     after?: string;
-}
-
-export interface UserSlotsInput {
-    first?: number;
-    after?: string;
+    startDate?: Date;
 }
 
 export interface IQuery {
     absenceTypes(input?: AbsenceTypesInput): AbsenceTypeConnection | Promise<AbsenceTypeConnection>;
     jobs(input?: JobsInput): JobConnection | Promise<JobConnection>;
-    slots(input?: SlotsInput): Slot[] | Promise<Slot[]>;
-    user(userID: string): User | Promise<User>;
+    slots(input: SlotsInput): Slot[] | Promise<Slot[]>;
+    currentUser(): User | Promise<User>;
 }
 
 export interface IMutation {
@@ -178,11 +178,11 @@ export interface PageInfo {
 }
 
 export interface BookSlotPayload {
-    slot: Slot;
+    userSlot: UserSlot;
 }
 
 export interface CancelBookedSlotPayload {
-    slot: Slot;
+    userSlot: UserSlot;
 }
 
 export interface AddSlotPayload {
@@ -197,45 +197,36 @@ export interface UpdateSlotPayload {
     slot: Slot;
 }
 
-export interface UpdateUserSlotPayload {
-    attendee: Attendee;
-}
-
-export interface SlotConnection {
-    edges?: SlotEdge[];
-    pageInfo?: PageInfo;
-    totalCount: number;
-}
-
-export interface SlotEdge {
-    cursor: string;
-    node: Slot;
-}
-
 export interface Slot {
     id: string;
     startDate: Date;
     duration: number;
     job: Job;
-    attendees: AttendeeConnection;
+    userSlots: UserSlotConnection;
     totalPlace: number;
     active: boolean;
 }
 
-export interface AttendeeConnection {
-    edges?: AttendeeEdge[];
+export interface UpdateUserSlotPayload {
+    userSlot: UserSlot;
+}
+
+export interface UserSlotConnection {
+    edges?: UserSlotEdge[];
     pageInfo?: PageInfo;
     totalCount: number;
 }
 
-export interface AttendeeEdge {
+export interface UserSlotEdge {
     cursor: string;
-    node: Attendee;
+    node: UserSlot;
 }
 
-export interface Attendee {
-    userSlotID: string;
-    userID: string;
+export interface UserSlot {
+    id: string;
+    user: User;
+    slot: Slot;
+    done: boolean;
     fullName: string;
     phoneNumber: string;
 }
@@ -253,8 +244,8 @@ export interface UserEdge {
 
 export interface User {
     id: string;
-    firstname: string;
-    lastname: string;
-    phoneNumber: string;
-    slots: SlotConnection;
+    fullName: string;
+    isAdmin?: boolean;
+    phoneNumber?: string;
+    userSlots: UserSlotConnection;
 }

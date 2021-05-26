@@ -1,19 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobsModule } from '../jobs/jobs.module';
-import { UsersModule } from '../users/users.module';
+import { UserSlotsModule } from '../user-slots/user-slots.module';
 import { Slot } from './slots.entity';
-import { AttendeeResolver, SlotsResolver } from './slots.resolver';
+import { SlotsResolver } from './slots.resolver';
 import { SlotsService } from './slots.service';
-import { UserSlotAbsence } from './users-slots-absences.entity';
-import { UserSlot } from './users-slots.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Slot, UserSlot, UserSlotAbsence]),
-    JobsModule,
-    UsersModule,
-  ],
-  providers: [SlotsResolver, AttendeeResolver, SlotsService],
+  imports: [TypeOrmModule.forFeature([Slot]), JobsModule, UserSlotsModule],
+  providers: [SlotsResolver, SlotsService],
 })
 export class SlotsModule {}

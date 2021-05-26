@@ -174,8 +174,7 @@ export default {
       yearFormatter: this.yearFormatterFunc(),
       locale: 'fr',
       events: [],
-      timeSlots: [],
-      userID: this.$q.cookies.get('userId')
+      timeSlots: []
     }
   },
   apollo: {
@@ -195,7 +194,7 @@ export default {
         data.slots.forEach(
           function(slot){
             const participants = []
-            slot.attendees.edges.forEach(function(edge){participants.push({fullName: edge.node.fullName, userSlotID: edge.node.userSlotID})})
+            slot.userSlots.edges.forEach(function(edge){participants.push({fullName: edge.node.fullName, userSlotID: edge.node.id})})
             const options = {
               year: 'numeric', month: '2-digit', day: '2-digit',
               hour: '2-digit', minute: '2-digit', second: '2-digit',
@@ -394,7 +393,6 @@ export default {
             // (everything except "component" and "parent" props above):
             // apiResponse: this.resp
             id: event.id,
-            userID: this.userID,
             title: event.title,
             weekday: this.weekdayFormatter(timestamp, false),
             day: this.dayFormatter(timestamp, false),

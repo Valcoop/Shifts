@@ -18,7 +18,7 @@
       <template v-slot:append>
         <q-icon name="access_time" class="cursor-pointer">
           <q-popup-proxy transition-show="scale" transition-hide="scale">
-            <q-time v-model="timeSlot.time" :minute-options="[0,15,30,45]">
+            <q-time v-model="timeSlot.time" :hour-options="[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]" :minute-options="[0,15,30,45]">
               <div class="row items-center justify-end">
                 <q-btn v-close-popup label="Close" color="primary" flat />
               </div>

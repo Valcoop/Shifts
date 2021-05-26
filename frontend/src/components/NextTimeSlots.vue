@@ -57,7 +57,6 @@ export default {
   data () {
     return {
       slide: 1,
-      userID: this.$q.cookies.get('userId'),
       tab: 'horaires',
       monthFormatter: this.monthFormatterFunc(),
       dayFormatter: this.dayFormatterFunc(),
@@ -110,9 +109,9 @@ export default {
         data.slots.forEach(
           function (slot) {
             const participants = []
-            slot.attendees.edges.forEach(
+            slot.userSlots.edges.forEach(
               function (edge) {
-                participants.push({ userSlotId: edge.node.userSlotId, fullName: edge.node.fullName })
+                participants.push({ userSlotId: edge.node.id, fullName: edge.node.fullName })
               }
             )
             nextTimeSlots.push(
@@ -201,7 +200,6 @@ export default {
           // (everything except "component" and "parent" props above):
           // apiResponse: this.resp
           id: row.id,
-          userID: this.userID,
           title: row.title,
           weekday: this.weekdayFormatter(timestamp, false),
           day: this.dayFormatter(timestamp, false),

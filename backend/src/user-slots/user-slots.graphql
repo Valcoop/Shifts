@@ -1,0 +1,33 @@
+type Mutation {
+  updateUserSlot(input: UpdateUserSlotInput!): UpdateUserSlotPayload!
+}
+
+input UpdateUserSlotInput {
+  userSlotID: ID!
+  fullName: String
+  phoneNumber: String
+}
+
+type UpdateUserSlotPayload {
+  userSlot: UserSlot!
+}
+
+type UserSlotConnection {
+  edges: [UserSlotEdge!]
+  pageInfo: PageInfo
+  totalCount: Int!
+}
+
+type UserSlotEdge {
+  cursor: ID!
+  node: UserSlot!
+}
+
+type UserSlot {
+  id: ID!
+  user: User!
+  slot: Slot!
+  done: Boolean!
+  fullName: String!
+  phoneNumber: String!
+}

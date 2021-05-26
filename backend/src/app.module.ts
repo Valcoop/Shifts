@@ -1,21 +1,38 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { AbsenceTypesModule } from './absence-types/absence-types.module';
+import { AuthModule } from './auth/auth.module';
+import { CORS_OPTION } from './constants';
+import { RolesGuard } from './guards/roles.guard';
 import { JobsModule } from './jobs/jobs.module';
+import { Logger } from './logger';
+import LoginMiddleware from './login.middleware';
 import { SlotsModule } from './slots/slots.module';
+import { UserSlotsModule } from './user-slots/user-slots.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     AbsenceTypesModule,
+    AuthModule,
     JobsModule,
     SlotsModule,
     UsersModule,
+    UserSlotsModule,
     GraphQLModule.forRoot({
       typePaths: ['./**/*.graphql'],
       definitions: { path: join(process.cwd(), 'src/graphql.ts') },
+      // TODO: FIX ME
+      cors: CORS_OPTION,
+      context: ({ req, res }) => {
+        const logger = new Logger();
+        if (req.user) logger.setData('userID', req.user.id);
+
+        return { req: { ...req, logger }, res };
+      },
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -27,5 +44,15 @@ import { UsersModule } from './users/users.module';
       autoLoadEntities: true,
     }),
   ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoginMiddleware).forRoutes('*');
+  }
+}

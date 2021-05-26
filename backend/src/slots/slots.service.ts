@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, LessThan, Repository } from 'typeorm';
-import { BookSlotInput, CancelBookedSlotInput, SlotsInput } from '../graphql';
+import { Between, Repository } from 'typeorm';
+import { buildPaginator } from 'typeorm-cursor-pagination';
+import { SlotsInput } from '../graphql';
+import { Job } from '../jobs/jobs.entity';
+import { UserSlot } from '../user-slots/user-slots.entity';
 import { Slot } from './slots.entity';
-import { UserSlotAbsence } from './users-slots-absences.entity';
-import { UserSlot } from './users-slots.entity';
 
 interface SlotDAO {
   active: boolean;
@@ -12,13 +13,9 @@ interface SlotDAO {
   lastUserAdminUpdated: number;
   startDate: Date;
   duration: number;
-  jobID: number;
+  job: Job;
   totalPlace: number;
-}
-
-interface UserSlotDAO {
-  fullName: string;
-  phoneNumber: string;
+  isDeleted: boolean;
 }
 
 @Injectable()
@@ -27,122 +24,104 @@ export class SlotsService {
     @InjectRepository(Slot) private slotRepository: Repository<Slot>,
     @InjectRepository(UserSlot)
     private userSlotRepository: Repository<UserSlot>,
-    @InjectRepository(UserSlotAbsence)
-    private userSlotAbsenceRepository: Repository<UserSlotAbsence>,
   ) {}
 
-  async find({ active, endDate, startDate, isFull }: SlotsInput) {
-    const slots = await this.slotRepository.find({
-      where: {
-        ...(active != null ? { active } : {}),
-        startDate: Between(startDate, endDate),
-      },
-      order: { startDate: 1 },
+  async find({
+    active,
+    endDate,
+    startDate,
+    isFull,
+  }: SlotsInput): Promise<Slot[]> {
+    if (isFull == undefined) {
+      return this.slotRepository.find({
+        where: {
+          ...(active != null ? { active } : {}),
+          startDate: Between(startDate, endDate),
+          isDeleted: false,
+        },
+        relations: ['job'],
+      });
+    }
+
+    const queryBuilder = await this.slotRepository
+      .createQueryBuilder('slot')
+      .leftJoinAndSelect('slot.userSlots', 'userSlot')
+      .where('slot.isDeleted = false')
+      .andWhere('slot.startDate BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      });
+
+    if (active != null) queryBuilder.andWhere('active = :active', { active });
+    const slots = await queryBuilder.getMany();
+
+    slots.forEach((slot) => {
+      slot.userSlots = slot.userSlots.filter(
+        (userSlot) =>
+          userSlot.isDeleted !== true && userSlot.userSlotAbsenceID == null,
+      );
     });
-
-    if (isFull == undefined) return slots;
-
-    const userSlotsCount = await Promise.all(
-      slots.map((slot) =>
-        this.userSlotRepository.count({ isDeleted: false, slotID: slot.id }),
-      ),
-    );
 
     return isFull
-      ? slots.filter((slot, i) => userSlotsCount[i] >= slot.totalPlace)
-      : slots.filter((slot, i) => userSlotsCount[i] < slot.totalPlace);
+      ? slots.filter((slot) => slot.userSlots.length >= slot.totalPlace)
+      : slots.filter((slot) => slot.userSlots.length < slot.totalPlace);
   }
 
-  async book({ userID, slotID, fullName, phoneNumber }: BookSlotInput) {
-    const slot = await this.slotRepository.findOne(slotID);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-
-    const userSlotEntity = this.userSlotRepository.create({
-      done: false,
-      userID: Number(userID),
-      slotID: Number(slotID),
-      fullName,
-      phoneNumber,
-      isDeleted: false,
-    });
-    await this.userSlotRepository.save(userSlotEntity);
-
-    return slot;
+  findByID(id: number): Promise<Slot | undefined> {
+    return this.slotRepository.findOne(id, { relations: ['job'] });
   }
 
-  async cancelBooked({
-    userSlotID,
-    absenceTypeID,
-    description,
-  }: CancelBookedSlotInput) {
-    const userSlot = await this.userSlotRepository.findOne(userSlotID);
-    // TODO: FIX ME
-    if (!userSlot) throw new Error();
+  save(slotDAO: SlotDAO): Promise<Slot> {
+    return this.slotRepository.save(this.slotRepository.create(slotDAO));
+  }
 
-    const userSlotAbsence = await this.userSlotAbsenceRepository.save(
-      this.userSlotAbsenceRepository.create({
-        userID: userSlot.userID,
-        absenceTypeID: Number(absenceTypeID),
-        description,
-      }),
+  delete(slot: Slot): Promise<Slot> {
+    return this.slotRepository.save({ ...slot, isDeleted: true });
+  }
+
+  update(slot: Slot, slotDAO: Partial<SlotDAO>): Promise<Slot> {
+    return this.slotRepository.save(
+      this.slotRepository.create({ ...slot, ...slotDAO }),
     );
-
-    await this.userSlotRepository.save({
-      id: userSlot.id,
-      userSlotAbsenceID: userSlotAbsence.id,
-      isDeleted: true,
-    });
-
-    const slot = await this.slotRepository.findOne(userSlot.slotID);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-    return slot;
-  }
-
-  save(slotDAO: SlotDAO) {
-    const slotEntity = this.slotRepository.create(slotDAO);
-    return this.slotRepository.save(slotEntity);
-  }
-
-  async remove(slotID: number) {
-    const slot = await this.slotRepository.findOne(slotID);
-    // TODO: FIX ME
-    if (!slot) throw new Error();
-    await this.slotRepository.remove(slot);
-
-    return slot;
-  }
-
-  update(slotID: number, slotDAO: Partial<SlotDAO>) {
-    const slotEntity = this.slotRepository.create({ id: slotID, ...slotDAO });
-    return this.slotRepository.save(slotEntity);
-  }
-
-  async getAttendeesAndCount(
-    slotID: number,
-    pagination: { first?: number; after?: string },
-  ): Promise<[UserSlot[], number]> {
-    return Promise.all([
-      this.userSlotRepository.find({
-        where: {
-          slotID,
-          isDeleted: false,
-          ...(pagination.after && { id: LessThan(pagination.after) }),
-        },
-        take: pagination.first || 10,
-      }),
-      this.userSlotRepository.count({ where: { slotID, isDeleted: false } }),
-    ]);
   }
 
   // UserSlot
-  updateUserSlot(id: number, userSlotDAO: Partial<UserSlotDAO>) {
-    return this.userSlotRepository.save(
-      this.userSlotRepository.create({
-        id,
-        ...userSlotDAO,
-      }),
-    );
+  countUserSlots(slotID: number): Promise<number> {
+    return this.userSlotRepository
+      .createQueryBuilder('user_slot')
+      .innerJoinAndSelect('user_slot.slot', 'slot')
+      .innerJoinAndSelect('user_slot.user', 'user')
+      .where('user_slot.slotID = :slotID', { slotID })
+      .andWhere('user_slot.isDeleted = false')
+      .andWhere('slot.isDeleted = false')
+      .andWhere('user_slot.userSlotAbsenceID IS NULL')
+      .getCount();
+  }
+
+  getUserSlots(
+    slotID: number,
+    pagination?: { first?: number; after?: string },
+  ) {
+    const queryBuilder = this.userSlotRepository
+      .createQueryBuilder('user_slot')
+      .innerJoinAndSelect('user_slot.slot', 'slot')
+      .innerJoinAndSelect('user_slot.user', 'user')
+      .where('user_slot.slotID = :slotID', { slotID })
+      .andWhere('user_slot.isDeleted = false')
+      .andWhere('slot.isDeleted = false')
+      .andWhere('user_slot.userSlotAbsenceID IS NULL');
+
+    const nextPaginator = buildPaginator({
+      entity: UserSlot,
+      alias: 'user_slot',
+      paginationKeys: ['id'],
+      query: {
+        limit: pagination?.first || 10,
+        order: 'ASC',
+        afterCursor: pagination?.after,
+      },
+    });
+
+    return nextPaginator.paginate(queryBuilder);
   }
 }

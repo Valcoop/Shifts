@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { buildPaginator } from 'typeorm-cursor-pagination';
 import { AbsenceType } from './absence-types.entity';
 
 interface AbsenceTypeDAO {
@@ -14,26 +15,46 @@ export class AbsenceTypesService {
     private absenceTypeRepository: Repository<AbsenceType>,
   ) {}
 
-  find(pagination?: { first?: number; after?: string }) {
-    return Promise.all([
-      this.absenceTypeRepository.find({
-        ...(pagination?.after && { where: { id: LessThan(pagination.after) } }),
-        take: pagination?.first || 10,
-      }),
-      this.absenceTypeRepository.count(),
-    ]);
+  count(): Promise<number> {
+    return this.absenceTypeRepository.count();
   }
 
-  save(reason: string) {
+  find(pagination?: { first?: number; after?: string }) {
+    const queryBuilder = this.absenceTypeRepository.createQueryBuilder(
+      'absence_type',
+    );
+
+    const nextPaginator = buildPaginator({
+      entity: AbsenceType,
+      alias: 'absence_type',
+      paginationKeys: ['id'],
+      query: {
+        limit: pagination?.first || 10,
+        order: 'ASC',
+        afterCursor: pagination?.after,
+      },
+    });
+
+    return nextPaginator.paginate(queryBuilder);
+  }
+
+  findByID(id: number): Promise<AbsenceType | undefined> {
+    return this.absenceTypeRepository.findOne(id);
+  }
+
+  save(reason: string): Promise<AbsenceType> {
     return this.absenceTypeRepository.save(
       this.absenceTypeRepository.create({ reason }),
     );
   }
 
-  update(absenceTypeID: number, absenceTypeDAO: Partial<AbsenceTypeDAO>) {
+  update(
+    absenceType: AbsenceType,
+    absenceTypeDAO: Partial<AbsenceTypeDAO>,
+  ): Promise<AbsenceType> {
     return this.absenceTypeRepository.save(
       this.absenceTypeRepository.create({
-        id: absenceTypeID,
+        ...absenceType,
         ...absenceTypeDAO,
       }),
     );

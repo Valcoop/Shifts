@@ -1,48 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThan, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { buildPaginator } from 'typeorm-cursor-pagination';
 import { Job } from './jobs.entity';
 
 interface JobDAO {
   name: string;
   color: string;
+  isDeleted: boolean;
 }
 
 @Injectable()
 export class JobsService {
   constructor(@InjectRepository(Job) private jobRepository: Repository<Job>) {}
 
+  count(): Promise<number> {
+    return this.jobRepository.count({ isDeleted: false });
+  }
+
+  delete(job: Job) {
+    return this.jobRepository.save({ ...job, isDeleted: true });
+  }
+
   find(pagination?: { first?: number; after?: string }) {
-    return Promise.all([
-      this.jobRepository.find({
-        ...(pagination?.after && { where: { id: LessThan(pagination.after) } }),
-        take: pagination?.first || 10,
-      }),
-      this.jobRepository.count(),
-    ]);
+    const queryBuilder = this.jobRepository
+      .createQueryBuilder('job')
+      .where('job.isDeleted = false');
+
+    const nextPaginator = buildPaginator({
+      entity: Job,
+      alias: 'job',
+      paginationKeys: ['id'],
+      query: {
+        limit: pagination?.first || 10,
+        order: 'ASC',
+        afterCursor: pagination?.after,
+      },
+    });
+
+    return nextPaginator.paginate(queryBuilder);
   }
 
-  findByID(id: number) {
-    return this.jobRepository.findOne({ where: { id } });
+  findByID(id: number): Promise<Job | undefined> {
+    return this.jobRepository.findOne(id);
   }
 
-  save(jobDAO: JobDAO) {
+  save(jobDAO: JobDAO): Promise<Job> {
     return this.jobRepository.save(this.jobRepository.create(jobDAO));
   }
 
-  async delete(jobID: string) {
-    const job = await this.jobRepository.findOne(jobID);
-    // TODO: FIX ME
-    if (!job) throw new Error();
-
-    this.jobRepository.remove(job);
-
-    return job;
-  }
-
-  update(jobID: number, jobDAO: Partial<JobDAO>) {
+  update(job: Job, jobDAO: Partial<JobDAO>): Promise<Job> {
     return this.jobRepository.save(
-      this.jobRepository.create({ id: jobID, ...jobDAO }),
+      this.jobRepository.create({ ...job, ...jobDAO }),
     );
   }
 }
