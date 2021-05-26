@@ -60,6 +60,12 @@ export class SlotsResolver {
     // TODO: FIX ME
     if (!slot.active || slot.isDeleted) throw new Error();
 
+    const userSlotCount = await this.slotsService.countUserSlots(slot.id);
+    if (userSlotCount >= slot.totalPlace) {
+      logger.warn('Slot is full', SlotsResolver.name, { slotID });
+      throw new Error();
+    }
+
     return {
       userSlot: await this.userSlotsService.save({
         done: false,
@@ -139,6 +145,14 @@ export class SlotsResolver {
     if (!slot) {
       logger.warn('No such slot', SlotsResolver.name, { slotID });
       throw new ApolloError('No such slot', 'INVALID_ID');
+    }
+
+    const userSlotCount = await this.slotsService.countUserSlots(slot.id);
+    if (userSlotCount !== 0) {
+      logger.warn('Cannot delete slot with user', SlotsResolver.name, {
+        slotID: slot.id,
+      });
+      throw new Error();
     }
 
     return { slot: await this.slotsService.delete(slot) };
