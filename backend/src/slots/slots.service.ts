@@ -55,9 +55,12 @@ export class SlotsService {
     if (active != null) queryBuilder.andWhere('active = :active', { active });
     const slots = await queryBuilder.getMany();
 
-    slots.forEach(slot => {
-      slot.userSlots = slot.userSlots.filter(userSlot => userSlot.isDeleted !== true && userSlot.userSlotAbsenceID == null)
-    })
+    slots.forEach((slot) => {
+      slot.userSlots = slot.userSlots.filter(
+        (userSlot) =>
+          userSlot.isDeleted !== true && userSlot.userSlotAbsenceID == null,
+      );
+    });
 
     return isFull
       ? slots.filter((slot) => slot.userSlots.length >= slot.totalPlace)

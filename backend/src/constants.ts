@@ -11,7 +11,7 @@ export const CORS_OPTION = {
 };
 
 /** Nexcloud */
-export const PLANNING_GROUP_NAME = 'planning';
+export const PLANNING_GROUP_NAME = process.env.PLANNING_GROUP_NAME;
 
 export const OAUTH_TOKEN_PATH = '/apps/oauth2/api/v1/token';
 export const OAUTH_AUTHORIZE_PATH = '/apps/oauth2/authorize';

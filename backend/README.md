@@ -4,7 +4,7 @@
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
-  
+
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
@@ -33,6 +33,23 @@ $ npm install
 ```
 
 ## Running the app
+
+### Env var
+
+```bash
+DB_ROOT_PASSWORD=
+DB=
+DB_USERNAME=
+DB_PASSWORD=
+
+OAUTH_HOST=
+OAUTH_CLIENT_ID=
+OAUTH_SECRET=
+
+PLANNING_GROUP_NAME=
+```
+
+### Command
 
 ```bash
 # development
@@ -70,4 +87,4 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## License
 
-  Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
