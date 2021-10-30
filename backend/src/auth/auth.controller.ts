@@ -113,7 +113,7 @@ export class AuthController {
       );
 
       return res.redirect(`${process.env.APP_HOST}`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(`Access Token Error, ${error.message}`);
       return res.status(500).json('Authentication failed');
     }

@@ -7,6 +7,7 @@
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
+    "lint-fix": "eslint --ext .js,.vue src --fix",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
@@ -15,13 +16,14 @@
     "chart.js": "^2.9.4",
     "core-js": "^3.6.5",
     "graphql": "^15.5.0",
+    "graphql-tag": "^2.12.5",
     "quasar": "^1.0.0",
     "vue-apollo": "^3.0.7",
     "vue-mq": "^1.0.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",
-    "@quasar/quasar-app-extension-apollo": "*",
+    "@quasar/quasar-app-extension-apollo": "1.0.0-beta.8",
     "babel-eslint": "^10.0.1",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.0",

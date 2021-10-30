@@ -1,14 +1,23 @@
 <template>
-  <div class="row items-center" style="max-width: 100%; width: 100%; height: 100%;">
+  <div
+    class="row items-center"
+    style="max-width: 100%; width: 100%; height: 100%"
+  >
     <div class="col full-height">
       <div class="row justify-center items-center">
-        <q-btn @click="calendarPrev" icon="fas fa-angle-left"/>
+        <q-btn @click="calendarPrev" icon="fas fa-angle-left" />
         <q-separator vertical />
-        <q-btn @click="calendarNext" icon="fas fa-angle-right"/>
-        <q-btn color="primary" label="Aujourd'hui" @click="setToday" flat class="q-ml-sm"/>
+        <q-btn @click="calendarNext" icon="fas fa-angle-right" />
+        <q-btn
+          color="primary"
+          label="Aujourd'hui"
+          @click="setToday"
+          flat
+          class="q-ml-sm"
+        />
       </div>
       <q-separator />
-      <div v-if="!this.$apollo.loading" style="overflow: hidden; height: 100%;">
+      <div v-if="!this.$apollo.loading" style="overflow: hidden; height: 100%">
         <q-calendar
           ref="calendar"
           v-model="selectedDate"
@@ -25,47 +34,92 @@
           @click:time2="onClickTimeDialog"
         >
           <template #head-day="{ timestamp }">
-            <div class="row justify-between items-center text-white overflow-hidden" style="background: #26A69A">
-              <div class="text-center" style="width: 100%;">{{ weekdayFormatter(timestamp, false).toUpperCase() }}</div>
-              <div class="text-center text-bold" style="width: 100%;  font-size: 16px;">{{ dayFormatter(timestamp, false) }}</div>
-              <div class="text-center" style="width: 100%; font-size: 16px;">{{ monthFormatter(timestamp, false) }} {{ yearFormatter(timestamp, false) }}</div>
+            <div
+              class="
+                row
+                justify-between
+                items-center
+                text-white
+                overflow-hidden
+              "
+              style="background: #26a69a"
+            >
+              <div class="text-center" style="width: 100%">
+                {{ weekdayFormatter(timestamp, false).toUpperCase() }}
+              </div>
+              <div
+                class="text-center text-bold"
+                style="width: 100%; font-size: 16px"
+              >
+                {{ dayFormatter(timestamp, false) }}
+              </div>
+              <div class="text-center" style="width: 100%; font-size: 16px">
+                {{ monthFormatter(timestamp, false) }}
+                {{ yearFormatter(timestamp, false) }}
+              </div>
             </div>
           </template>
           <template #day-body="{ timestamp, timeStartPos, timeDurationHeight }">
             <template v-for="(event, index) in getTimeSlots(timestamp.date)">
-                <q-card
-                  v-ripple
+              <q-card
+                v-ripple
+                v-if="event.time"
+                :key="index"
+                class="my-event justify-center bordered"
+                :class="badgeClasses(event, 'body')"
+                :style="
+                  badgeStyles(event, 'body', timeStartPos, timeDurationHeight)
+                "
+                @click="showRegisterDialog(event, timestamp)"
+              >
+                <q-linear-progress
                   v-if="event.time"
                   :key="index"
-                  class="my-event justify-center bordered"
-                  :class="badgeClasses(event, 'body')"
-                  :style="badgeStyles(event, 'body', timeStartPos, timeDurationHeight)"
-                  @click="showRegisterDialog(event, timestamp)"
+                  size="sm"
+                  :value="progressBarValue(event)"
+                  :color="colorProgressBar(event)"
+                />
+                <q-tooltip v-if="event.number !== event.participants.length">
+                  {{ event.title }}:
+                  {{ event.number - event.participants.length }} places
+                  restantes
+                </q-tooltip>
+                <q-tooltip v-else> {{ event.title }}: Complet </q-tooltip>
+                <q-card-section class="q-pa-xs">
+                  <span v-if="$mq === 'lg'" class="ellipsis center">{{
+                    event.title
+                  }}</span>
+                </q-card-section>
+                <div
+                  v-if="
+                    event.participants && $mq === 'lg' && event.duration >= 60
+                  "
+                  class="q-pl-xs"
                 >
-                    <q-linear-progress
-                        v-if="event.time"
-                        :key="index"
-                        size='sm'
-                        :value="progressBarValue(event)"
-                        :color="colorProgressBar(event)"
-                      />
-                    <q-tooltip v-if="event.number !== event.participants.length">
-                      {{ event.title }}: {{ (event.number - event.participants.length) }} places restantes
-                    </q-tooltip>
-                    <q-tooltip v-else>
-                      {{ event.title }}: Complet
-                    </q-tooltip>
-                    <q-card-section class="q-pa-xs">
-                      <span v-if="$mq === 'lg'" class="ellipsis center">{{ event.title }}</span>
-                    </q-card-section>
-                    <div v-if="event.participants && $mq === 'lg' && event.duration >= 60" class="q-pl-xs">
-                      <q-btn size="4px" v-for="participant in event.participants" v-bind:key="participant.fullName" round color="grey" icon="fas fa-user-alt" disable>
-                        <q-tooltip content-class="bg-accent">{{ participant.fullName }}</q-tooltip>
-                      </q-btn>
-                      <q-btn size="4px" v-for="index in (event.number - event.participants.length)" :key="index" round color="secondary" icon="fas fa-plus" />
-                    </div>
-                </q-card>
-              </template>
+                  <q-btn
+                    size="4px"
+                    v-for="participant in event.participants"
+                    v-bind:key="participant.fullName"
+                    round
+                    color="grey"
+                    icon="fas fa-user-alt"
+                    disable
+                  >
+                    <q-tooltip content-class="bg-accent">{{
+                      participant.fullName
+                    }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    size="4px"
+                    v-for="index in event.number - event.participants.length"
+                    :key="index"
+                    round
+                    color="secondary"
+                    icon="fas fa-plus"
+                  />
+                </div>
+              </q-card>
+            </template>
           </template>
         </q-calendar>
       </div>
@@ -88,7 +142,8 @@ function getCurrentDay (day) {
   return tm.date
 }
 
-const reRGBA = /^\s*rgb(a)?\s*\((\s*(\d+)\s*,\s*?){2}(\d+)\s*,?\s*([01]?\.?\d*?)?\s*\)\s*$/
+const reRGBA =
+  /^\s*rgb(a)?\s*\((\s*(\d+)\s*,\s*?){2}(\d+)\s*,?\s*([01]?\.?\d*?)?\s*\)\s*$/
 
 function textToRgb (color) {
   if (typeof color !== 'string') {
@@ -126,8 +181,13 @@ function hexToRgb (hex) {
   const num = parseInt(hex, 16)
 
   return hex.length > 6
-    ? { r: num >> 24 & 255, g: num >> 16 & 255, b: num >> 8 & 255, a: Math.round((num & 255) / 2.55) }
-    : { r: num >> 16, g: num >> 8 & 255, b: num & 255 }
+    ? {
+      r: (num >> 24) & 255,
+      g: (num >> 16) & 255,
+      b: (num >> 8) & 255,
+      a: Math.round((num & 255) / 2.55)
+    }
+    : { r: num >> 16, g: (num >> 8) & 255, b: num & 255 }
 }
 
 function luminosity (color) {
@@ -135,8 +195,7 @@ function luminosity (color) {
     throw new TypeError('Expected a string or a {r, g, b} object as color')
   }
 
-  const
-    rgb = typeof color === 'string' ? textToRgb(color) : color,
+  const rgb = typeof color === 'string' ? textToRgb(color) : color,
     r = rgb.r / 255,
     g = rgb.g / 255,
     b = rgb.b / 255,
@@ -146,14 +205,14 @@ function luminosity (color) {
   return 0.2126 * R + 0.7152 * G + 0.0722 * B
 }
 
-function startOfWeek(date){
-  var date = new Date(date)
+function startOfWeek (_date) {
+  var date = new Date(_date)
   var diff = date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1)
   return new Date(date.setDate(diff))
 }
 
-function endOfWeek(date){
-  var date = new Date(date)
+function endOfWeek (_date) {
+  var date = new Date(_date)
   var lastday = date.getDate() - (date.getDay() - 1) + 7
   return new Date(date.setDate(lastday))
 }
@@ -180,43 +239,48 @@ export default {
   apollo: {
     timeSlots: {
       query: ACTIVE_PARAM_SLOTS_QUERY,
-        // Parameters
-        variables () {
-          return {
-            startDate: startOfWeek(this.selectedDate),
-            endDate: endOfWeek(this.selectedDate),
-            active: this.active
-          }
-        },
-        fetchPolicy: 'cache-and-network',
-      update: data => {
+      // Parameters
+      variables () {
+        return {
+          startDate: startOfWeek(this.selectedDate),
+          endDate: endOfWeek(this.selectedDate),
+          active: this.active
+        }
+      },
+      fetchPolicy: 'cache-and-network',
+      update: (data) => {
         var slots = []
-        data.slots.forEach(
-          function(slot){
-            const participants = []
-            slot.userSlots.edges.forEach(function(edge){participants.push({fullName: edge.node.fullName, userSlotID: edge.node.id})})
-            const options = {
-              year: 'numeric', month: '2-digit', day: '2-digit',
-              hour: '2-digit', minute: '2-digit', second: '2-digit',
-              timeZone: 'Europe/Paris'
-            }
-            const formatter = new Intl.DateTimeFormat('sv-SE', options)
-            slots.push(
-              { 
-                id: slot.id,
-                title: slot.job.name,
-                date: formatter.format(new Date(slot.startDate)).slice(0, 10),
-                time: formatter.format(new Date(slot.startDate)).slice(11, 16),
-                duration: slot.duration,
-                bgcolor: slot.job.color,
-                number: slot.totalPlace,
-                participants: participants,
-                active: slot.active,
-                jobID: slot.job.id
-              }
-            )
+        data.slots.forEach(function (slot) {
+          const participants = []
+          slot.userSlots.edges.forEach(function (edge) {
+            participants.push({
+              fullName: edge.node.fullName,
+              userSlotID: edge.node.id
+            })
+          })
+          const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Europe/Paris'
           }
-        )
+          const formatter = new Intl.DateTimeFormat('sv-SE', options)
+          slots.push({
+            id: slot.id,
+            title: slot.job.name,
+            date: formatter.format(new Date(slot.startDate)).slice(0, 10),
+            time: formatter.format(new Date(slot.startDate)).slice(11, 16),
+            duration: slot.duration,
+            bgcolor: slot.job.color,
+            number: slot.totalPlace,
+            participants: participants,
+            active: slot.active,
+            jobID: slot.job.id
+          })
+        })
         return slots
       }
     }
@@ -241,35 +305,31 @@ export default {
       const longOptions = { timeZone: 'UTC', month: 'long' }
       const shortOptions = { timeZone: 'UTC', month: 'short' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? shortOptions : longOptions
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? shortOptions : longOptions
       )
     },
     weekdayFormatterFunc () {
       const longOptions = { timeZone: 'UTC', weekday: 'long' }
       const shortOptions = { timeZone: 'UTC', weekday: 'short' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? shortOptions : longOptions
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? shortOptions : longOptions
       )
     },
     dayFormatterFunc () {
       const longOptions = { timeZone: 'UTC', day: '2-digit' }
       const shortOptions = { timeZone: 'UTC', day: 'numeric' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? shortOptions : longOptions
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? shortOptions : longOptions
       )
     },
     yearFormatterFunc () {
       const options = { timeZone: 'UTC', year: 'numeric' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? options : options
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? options : options
       )
     },
     isCssColor (color) {
@@ -290,7 +350,12 @@ export default {
         s.color = luminosity(event.bgcolor) > 0.5 ? 'black' : 'white'
       }
       if (!event.active) {
-        s.background = 'repeating-linear-gradient(45deg, ' + event.bgcolor + ' 0px, ' + event.bgcolor + ' 20px, #d3dfe8 20px, #d3dfe8 40px)'
+        s.background =
+          'repeating-linear-gradient(45deg, ' +
+          event.bgcolor +
+          ' 0px, ' +
+          event.bgcolor +
+          ' 20px, #d3dfe8 20px, #d3dfe8 40px)'
       }
       if (timeStartPos) {
         s.top = timeStartPos(event.time) + 'px'
@@ -306,7 +371,7 @@ export default {
         }
       }
       if (event.number === event.participants.length) {
-        s.opacity = 0.50
+        s.opacity = 0.5
       }
       s['z-index'] = event.zIndex
       s['align-items'] = 'flex-start'
@@ -317,30 +382,65 @@ export default {
       const todayTimeSlots = this.timeSlots.filter(function (el) {
         return el.date === dt
       })
-      todayTimeSlots.sort((a, b) => (QCalendar.parsed(a.date + ' ' + a.time) > QCalendar.parsed(b.date + ' ' + b.time)) ? 1 : ((QCalendar.parsed(a.date + ' ' + a.time) < QCalendar.parsed(b.date + ' ' + b.time)) ? -1 : 0))
+      todayTimeSlots.sort((a, b) =>
+        QCalendar.parsed(a.date + ' ' + a.time) >
+        QCalendar.parsed(b.date + ' ' + b.time)
+          ? 1
+          : QCalendar.parsed(a.date + ' ' + a.time) <
+            QCalendar.parsed(b.date + ' ' + b.time)
+            ? -1
+            : 0
+      )
       for (let i = 0; i < todayTimeSlots.length; ++i) {
         if (todayTimeSlots[i].time) {
           if (todayTimeSlots.length > 0) {
             // check for overlapping times
             todayTimeSlots[i].position = 1
             todayTimeSlots[i].nbOverlappingTimes = 1
-            const startTime = QCalendar.parsed(todayTimeSlots[i].date + ' ' + todayTimeSlots[i].time)
-            const endTime = QCalendar.addToDate(startTime, { minute: todayTimeSlots[i].duration })
+            const startTime = QCalendar.parsed(
+              todayTimeSlots[i].date + ' ' + todayTimeSlots[i].time
+            )
+            const endTime = QCalendar.addToDate(startTime, {
+              minute: todayTimeSlots[i].duration
+            })
             for (let j = 0; j < todayTimeSlots.length; ++j) {
               if (todayTimeSlots[i].id === todayTimeSlots[j].id) {
                 // pass
               } else if (todayTimeSlots[j].time) {
                 var added = false
-                const startTime2 = QCalendar.parsed(todayTimeSlots[j].date + ' ' + todayTimeSlots[j].time)
-                const endTime2 = QCalendar.addToDate(startTime2, { minute: todayTimeSlots[j].duration })
-                if (QCalendar.isBetweenDates(startTime, startTime2, endTime2, true) && !QCalendar.compareDateTime(startTime, endTime2)) {
-                  if (!QCalendar.compareTimestamps(startTime, startTime2) || todayTimeSlots[i].id > todayTimeSlots[j].id) {
+                const startTime2 = QCalendar.parsed(
+                  todayTimeSlots[j].date + ' ' + todayTimeSlots[j].time
+                )
+                const endTime2 = QCalendar.addToDate(startTime2, {
+                  minute: todayTimeSlots[j].duration
+                })
+                if (
+                  QCalendar.isBetweenDates(
+                    startTime,
+                    startTime2,
+                    endTime2,
+                    true
+                  ) &&
+                  !QCalendar.compareDateTime(startTime, endTime2)
+                ) {
+                  if (
+                    !QCalendar.compareTimestamps(startTime, startTime2) ||
+                    todayTimeSlots[i].id > todayTimeSlots[j].id
+                  ) {
                     todayTimeSlots[i].position += 1
                   }
                   todayTimeSlots[i].nbOverlappingTimes += 1
                   added = true
                 }
-                if (QCalendar.isBetweenDates(endTime, startTime2, endTime2, true) && !QCalendar.compareDateTime(endTime, startTime2)) {
+                if (
+                  QCalendar.isBetweenDates(
+                    endTime,
+                    startTime2,
+                    endTime2,
+                    true
+                  ) &&
+                  !QCalendar.compareDateTime(endTime, startTime2)
+                ) {
                   if (added === false) {
                     added = true
                     todayTimeSlots[i].nbOverlappingTimes += 1
@@ -353,7 +453,9 @@ export default {
         }
       }
       // order by duration and put z-index
-      todayTimeSlots.sort((a, b) => (a.duration < b.duration) ? 1 : (a.duration > b.duration) ? -1 : 0)
+      todayTimeSlots.sort((a, b) =>
+        a.duration < b.duration ? 1 : a.duration > b.duration ? -1 : 0
+      )
       for (let i = 0; i < todayTimeSlots.length; ++i) {
         todayTimeSlots[i].zIndex = i + 1
       }
@@ -366,13 +468,25 @@ export default {
       })
       const dateTime = QCalendar.parsed(dt + ' ' + time)
       for (let i = 0; i < todayTimeSlots.length; ++i) {
-        const startTime = QCalendar.parsed(todayTimeSlots[i].date + ' ' + todayTimeSlots[i].time)
-        const endTime = QCalendar.addToDate(startTime, { minute: todayTimeSlots[i].duration })
+        const startTime = QCalendar.parsed(
+          todayTimeSlots[i].date + ' ' + todayTimeSlots[i].time
+        )
+        const endTime = QCalendar.addToDate(startTime, {
+          minute: todayTimeSlots[i].duration
+        })
         if (QCalendar.isBetweenDates(dateTime, startTime, endTime, true)) {
           filteredTimeSlots.push(todayTimeSlots[i])
         }
       }
-      return filteredTimeSlots.sort((a, b) => (QCalendar.parsed(a.date + ' ' + a.time) > QCalendar.parsed(b.date + ' ' + b.time)) ? 1 : ((QCalendar.parsed(a.date + ' ' + a.time) < QCalendar.parsed(b.date + ' ' + b.time)) ? -1 : 0))
+      return filteredTimeSlots.sort((a, b) =>
+        QCalendar.parsed(a.date + ' ' + a.time) >
+        QCalendar.parsed(b.date + ' ' + b.time)
+          ? 1
+          : QCalendar.parsed(a.date + ' ' + a.time) <
+            QCalendar.parsed(b.date + ' ' + b.time)
+            ? -1
+            : 0
+      )
     },
     showRegisterDialog (event, timestamp) {
       if (this.type !== 'admin' && this.today <= timestamp.date) {
@@ -399,7 +513,12 @@ export default {
             month: this.monthFormatter(timestamp, false),
             year: this.yearFormatter(timestamp, false),
             startTime: event.time,
-            endTime: QCalendar.getTime(QCalendar.addToDate(QCalendar.parsed(event.date + ' ' + event.time), { minute: event.duration })),
+            endTime: QCalendar.getTime(
+              QCalendar.addToDate(
+                QCalendar.parsed(event.date + ' ' + event.time),
+                { minute: event.duration }
+              )
+            ),
             number: event.number,
             participants: event.participants
             // ...more.props...
@@ -417,7 +536,7 @@ export default {
       return null
     },
     progressBarValue (event) {
-      return (event.participants.length / event.number)
+      return event.participants.length / event.number
     },
     colorProgressBar (event) {
       const progress = this.progressBarValue(event)
@@ -435,9 +554,9 @@ export default {
       var minutes = parseInt(timeSplit[1])
       if (minutes < 15) {
         minutes = '00'
-      } else if (minutes>=15 && minutes<30){
+      } else if (minutes >= 15 && minutes < 30) {
         minutes = '15'
-      } else if (minutes>=30 && minutes<45 ){
+      } else if (minutes >= 30 && minutes < 45) {
         minutes = '30'
       } else {
         minutes = '45'
@@ -491,7 +610,9 @@ export default {
     },
     eventsMap () {
       const map = {}
-      this.events.forEach((event) => (map[event.date] = map[event.date] || []).push(event))
+      this.events.forEach((event) =>
+        (map[event.date] = map[event.date] || []).push(event)
+      )
       return map
     }
   }

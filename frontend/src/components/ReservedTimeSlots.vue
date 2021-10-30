@@ -1,61 +1,75 @@
 <template>
-  <q-card class='q-mt-sm'>
-      <q-card-section class='text-h6 q-pb-none'>
-        <q-item>
-          <q-item-section avatar class=''>
-            <q-icon color='blue' name='far fa-calendar-check' size='44px' />
-          </q-item-section>
+  <q-card class="q-mt-sm">
+    <q-card-section class="text-h6 q-pb-none">
+      <q-item>
+        <q-item-section avatar class="">
+          <q-icon color="blue" name="far fa-calendar-check" size="44px" />
+        </q-item-section>
 
-          <q-item-section>
-            <q-item-label>
-              <div class='text-h6'>Prochains créneaux reservés</div>
-            </q-item-label>
-            <q-item-label caption class='text-black'>
-              N'oubliez pas de venir!
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-card-section>
-      <q-card-section class='q-pa-none q-ma-none'>
-        <q-table class='no-shadow no-border' :data='reservedtimeSlots' :columns='columns'>
-          <template v-slot:body-cell-Horaires='props'>
-            <q-td :props="props">
-              <div>{{ getHoraire(props.row) }}</div>
-            </q-td>
-          </template>
-          <template v-slot:body-cell-Poste='props'>
-            <q-td :props='props'>
-              <q-item>
-                <q-item-section>
-                  <q-item-label>{{ props.row.poste }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-td>
-          </template>
-          <template v-slot:body-cell-Nom='props'>
-            <q-td :props='props'>
-              <q-item>
-                <q-item-section>
-                  <q-item-label>{{ props.row.name }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-td>
-          </template>
-          <template v-slot:body-cell-Actions="props">
-            <q-td :props="props">
-              <div class="row">
-                <div class="col">
-                  <q-btn round color="secondary" icon="fas fa-pencil-alt" @click="showModifyDialog(props.row)"/>
-                </div>
-                <div class="col">
-                  <q-btn round color="red" icon="fas fa-trash" @click="showDeleteDialog(props.row)"/>
-                </div>
+        <q-item-section>
+          <q-item-label>
+            <div class="text-h6">Prochains créneaux reservés</div>
+          </q-item-label>
+          <q-item-label caption class="text-black">
+            N'oubliez pas de venir!
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-card-section>
+    <q-card-section class="q-pa-none q-ma-none">
+      <q-table
+        class="no-shadow no-border"
+        :data="reservedtimeSlots"
+        :columns="columns"
+      >
+        <template v-slot:body-cell-Horaires="props">
+          <q-td :props="props">
+            <div>{{ getHoraire(props.row) }}</div>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-Poste="props">
+          <q-td :props="props">
+            <q-item>
+              <q-item-section>
+                <q-item-label>{{ props.row.poste }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-Nom="props">
+          <q-td :props="props">
+            <q-item>
+              <q-item-section>
+                <q-item-label>{{ props.row.name }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-Actions="props">
+          <q-td :props="props">
+            <div class="row">
+              <div class="col">
+                <q-btn
+                  round
+                  color="secondary"
+                  icon="fas fa-pencil-alt"
+                  @click="showModifyDialog(props.row)"
+                />
               </div>
-            </q-td>
-          </template>
-        </q-table>
-      </q-card-section>
-    </q-card>
+              <div class="col">
+                <q-btn
+                  round
+                  color="red"
+                  icon="fas fa-trash"
+                  @click="showDeleteDialog(props.row)"
+                />
+              </div>
+            </div>
+          </q-td>
+        </template>
+      </q-table>
+    </q-card-section>
+  </q-card>
 </template>
 
 <script>
@@ -97,8 +111,8 @@ export default {
         {
           name: 'Actions',
           label: 'Actions',
-          field: row => row.nom,
-          format: val => `${val}`,
+          field: (row) => row.nom,
+          format: (val) => `${val}`,
           align: 'left'
         }
       ]
@@ -107,38 +121,44 @@ export default {
   apollo: {
     reservedtimeSlots: {
       query: USER_QUERY,
-        // Parameters
-        variables () {
-          return {
-            startDate: new Date()
-          }
-        },
-        fetchPolicy: 'cache-and-network',
-      update: data => {
+      // Parameters
+      variables () {
+        return {
+          startDate: new Date()
+        }
+      },
+      fetchPolicy: 'cache-and-network',
+      update: (data) => {
         const reservedtimeSlots = []
-        for (let keySlot in data.currentUser.userSlots.edges){
+        for (const keySlot in data.currentUser.userSlots.edges) {
           const edge = data.currentUser.userSlots.edges[keySlot]
           const options = {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
             timeZone: 'Europe/Paris'
           }
           const formatter = new Intl.DateTimeFormat('sv-SE', options)
-          for (let keyParticipant in edge.node.slot.userSlots.edges) {
+          for (const keyParticipant in edge.node.slot.userSlots.edges) {
             const participant = edge.node.slot.userSlots.edges[keyParticipant]
-            if (participant.node.id == edge.node.id){
-              reservedtimeSlots.push(
-                { 
-                  userSlotID: participant.node.id,
-                  slotID: edge.node.slot.id,
-                  date: formatter.format(new Date(edge.node.slot.startDate)).slice(0, 10),
-                  time: formatter.format(new Date(edge.node.slot.startDate)).slice(11, 16),
-                  duration: edge.node.slot.duration,
-                  poste: edge.node.slot.job.name,
-                  name: participant.node.fullName,
-                  phone: participant.node.phoneNumber
-                }
-              )
+            if (participant.node.id === edge.node.id) {
+              reservedtimeSlots.push({
+                userSlotID: participant.node.id,
+                slotID: edge.node.slot.id,
+                date: formatter
+                  .format(new Date(edge.node.slot.startDate))
+                  .slice(0, 10),
+                time: formatter
+                  .format(new Date(edge.node.slot.startDate))
+                  .slice(11, 16),
+                duration: edge.node.slot.duration,
+                poste: edge.node.slot.job.name,
+                name: participant.node.fullName,
+                phone: participant.node.phoneNumber
+              })
             }
           }
         }
@@ -151,35 +171,31 @@ export default {
       const longOptions = { timeZone: 'UTC', month: 'long' }
       const shortOptions = { timeZone: 'UTC', month: 'short' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? shortOptions : longOptions
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? shortOptions : longOptions
       )
     },
     weekdayFormatterFunc () {
       const longOptions = { timeZone: 'UTC', weekday: 'long' }
       const shortOptions = { timeZone: 'UTC', weekday: 'short' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? shortOptions : longOptions
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? shortOptions : longOptions
       )
     },
     dayFormatterFunc () {
       const longOptions = { timeZone: 'UTC', day: '2-digit' }
       const shortOptions = { timeZone: 'UTC', day: 'numeric' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? shortOptions : longOptions
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? shortOptions : longOptions
       )
     },
     yearFormatterFunc () {
       const options = { timeZone: 'UTC', year: 'numeric' }
 
-      return QCalendar.createNativeLocaleFormatter(
-        this.locale,
-        (_tms, short) => short ? options : options
+      return QCalendar.createNativeLocaleFormatter(this.locale, (_tms, short) =>
+        short ? options : options
       )
     },
     getHoraire (row) {
@@ -188,7 +204,21 @@ export default {
       const day = this.dayFormatter(timestamp, false)
       const month = this.monthFormatter(timestamp, false)
       const year = this.yearFormatter(timestamp, false)
-      return weekday + ' ' + day + ' ' + month + ' ' + year + ' de ' + row.time + ' à ' + QCalendar.getTime(QCalendar.addToDate(timestamp, { minute: row.duration }))
+      return (
+        weekday +
+        ' ' +
+        day +
+        ' ' +
+        month +
+        ' ' +
+        year +
+        ' de ' +
+        row.time +
+        ' à ' +
+        QCalendar.getTime(
+          QCalendar.addToDate(timestamp, { minute: row.duration })
+        )
+      )
     },
     showModifyDialog (row) {
       const timestamp = QCalendar.parsed(row.date + ' ' + row.time)
@@ -216,7 +246,9 @@ export default {
           month: this.monthFormatter(timestamp, false),
           year: this.yearFormatter(timestamp, false),
           startTime: row.time,
-          endTime: QCalendar.getTime(QCalendar.addToDate(timestamp, { minute: row.duration })),
+          endTime: QCalendar.getTime(
+            QCalendar.addToDate(timestamp, { minute: row.duration })
+          ),
           name: row.name,
           phone: row.phone
           // ...more.props...
@@ -257,7 +289,9 @@ export default {
           month: this.monthFormatter(timestamp, false),
           year: this.yearFormatter(timestamp, false),
           startTime: row.time,
-          endTime: QCalendar.getTime(QCalendar.addToDate(timestamp, { minute: row.duration }))
+          endTime: QCalendar.getTime(
+            QCalendar.addToDate(timestamp, { minute: row.duration })
+          )
           // ...more.props...
         })
         .onOk(() => {
